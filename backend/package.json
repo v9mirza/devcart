@@ -12,7 +12,8 @@
     "test:auth": "node scripts/test-auth.js",
     "test:products": "node scripts/test-products.js",
     "test:orders": "node scripts/test-orders.js",
-    "test:mvp": "npm run test:health && npm run test:auth && npm run test:products && npm run test:orders"
+    "test:cart": "node scripts/test-cart.js",
+    "test:mvp": "npm run test:health && npm run test:auth && npm run test:products && npm run test:orders && npm run test:cart"
 
   },
   "keywords": [],
