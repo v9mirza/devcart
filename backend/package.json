@@ -13,7 +13,8 @@
     "test:products": "node scripts/test-products.js",
     "test:orders": "node scripts/test-orders.js",
     "test:cart": "node scripts/test-cart.js",
-    "test:mvp": "npm run test:health && npm run test:auth && npm run test:products && npm run test:orders && npm run test:cart"
+    "test:wishlist": "node scripts/test-wishlist.js",
+    "test:mvp": "npm run test:health && npm run test:auth && npm run test:products && npm run test:orders && npm run test:cart && npm run test:wishlist"
   },
   "keywords": [],
   "author": "",

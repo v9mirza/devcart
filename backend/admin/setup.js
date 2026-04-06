@@ -4,6 +4,7 @@ const User = require("../models/User");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
+const Wishlist = require("../models/Wishlist");
 
 const setupAdmin = async (app) => {
   // Use dynamic imports since AdminJS packages are ESM only
@@ -22,6 +23,7 @@ const setupAdmin = async (app) => {
       { resource: Product, options: { navigation: "Store" } },
       { resource: Order, options: { navigation: "Store" } },
       { resource: Cart, options: { navigation: "Store" } },
+      { resource: Wishlist, options: { navigation: "Store" } },
     ],
     rootPath: "/admin",
     branding: {
