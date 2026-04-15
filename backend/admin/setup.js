@@ -1,6 +1,7 @@
 const { MongoStore } = require("connect-mongo");
 
 const User = require("../models/User");
+const Category = require("../models/Category");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
@@ -20,6 +21,7 @@ const setupAdmin = async (app) => {
   const admin = new AdminJS({
     resources: [
       { resource: User, options: { navigation: "Users" } },
+      { resource: Category, options: { navigation: "Store" } },
       { resource: Product, options: { navigation: "Store" } },
       { resource: Order, options: { navigation: "Store" } },
       { resource: Cart, options: { navigation: "Store" } },

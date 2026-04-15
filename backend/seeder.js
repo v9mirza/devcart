@@ -1,11 +1,23 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const Product = require("./models/Product");
+const Category = require("./models/Category");
 
 dotenv.config();
 
-// sample products
-const products = [
+// categories to be created
+const categories = [
+  { name: "Audio", description: "Audio devices and speakers" },
+  { name: "Wearables", description: "Wearable technology" },
+  { name: "Accessories", description: "Computer accessories" },
+  { name: "Storage", description: "Storage devices" },
+  { name: "Power", description: "Charging and power devices" },
+  { name: "Displays", description: "Monitors and displays" },
+  { name: "Furniture", description: "Office furniture" },
+];
+
+// sample products (with category names, will map to IDs)
+const productTemplates = [
   {
     name: "Wireless Headphones",
     description: "High quality wireless headphones",
@@ -128,22 +140,36 @@ const products = [
   },
 ];
 
-const seedProducts = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-
-    // clear existing products
+    // Clear existing categories and products
+    await Category.deleteMany();
     await Product.deleteMany();
 
-    // insert new products
-    await Product.insertMany(products);
+    // Create categories
+    const createdCategories = await Category.insertMany(categories);
+    console.log(`Created ${createdCategories.length} categories`);
 
-    console.log("Products seeded");
+    // Map category names to IDs
+    const categoryMap = {};
+    createdCategories.forEach((cat) => {
+      categoryMap[cat.name] = cat._id;
+    });
+
+    // Map product templates to use category IDs
+    const products = productTemplates.map((product) => ({
+      ...product,
+      category: categoryMap[product.category],
+    }));
+
+    // Create products
+    const createdProducts = await Product.insertMany(products);
+    console.log(`Created ${createdProducts.length} products`);
+
+    console.log("Database seeded successfully");
     process.exit();
   } catch (err) {
-    console.error(err);
+    console.error("Seeding error:", err);
     process.exit(1);
   }
 };
 
-seedProducts();
+seedDatabase();

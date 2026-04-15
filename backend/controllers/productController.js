@@ -71,6 +71,7 @@ exports.createProduct = async (req, res) => {
   }
 
   try {
+    // Handle category - accept as string
     const product = new Product({
       name,
       description,
@@ -82,7 +83,7 @@ exports.createProduct = async (req, res) => {
 
     const createdProduct = await product.save();
     res.status(201).json(createdProduct);
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 };
