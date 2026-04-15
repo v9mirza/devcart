@@ -81,8 +81,29 @@ exports.getMyOrders = async (req, res) => {
 // @access  Private/Admin
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({}).populate("user", "id name email");
-    res.json(orders);
+    const { page = 1, limit = 10 } = req.query;
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const pageSize = Math.max(1, Math.min(100, parseInt(limit) || 10));
+    const skip = (pageNum - 1) * pageSize;
+
+    const total = await Order.countDocuments({});
+    const orders = await Order.find({})
+      .populate("user", "id name email")
+      .skip(skip)
+      .limit(pageSize);
+    const pages = Math.ceil(total / pageSize);
+
+    res.json({
+      data: orders,
+      pagination: {
+        total,
+        page: pageNum,
+        pages,
+        limit: pageSize,
+        hasNextPage: pageNum < pages,
+        hasPrevPage: pageNum > 1,
+      },
+    });
   } catch {
     res.status(500).json({ message: "Server error" });
   }

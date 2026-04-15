@@ -34,7 +34,7 @@ async function run() {
   logStep("Products flow: GET /api/products");
   const listRes = await request("/api/products");
   assertOk(listRes, "GET /api/products");
-  assertTrue(Array.isArray(listRes.data), "Products list must be an array");
+  assertTrue(Array.isArray(listRes.data?.data), "Products list must be an array");
 
   logStep("Products flow: create product as admin");
   const createBody = uniqueProduct();
@@ -56,9 +56,9 @@ async function run() {
   logStep("Products flow: GET /api/products?category=Testing");
   const categoryRes = await request(`/api/products?category=${encodeURIComponent(createBody.category)}`);
   assertOk(categoryRes, "GET /api/products?category");
-  assertTrue(Array.isArray(categoryRes.data), "Category products response must be an array");
+  assertTrue(Array.isArray(categoryRes.data?.data), "Category products response must be an array");
   assertTrue(
-    categoryRes.data.some((product) => product._id === productId),
+    categoryRes.data?.data.some((product) => product._id === productId),
     "Category filter did not include created product"
   );
 

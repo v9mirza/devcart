@@ -4,15 +4,31 @@ const Product = require("../models/Product");
 // GET /api/products
 exports.getProducts = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, page = 1, limit = 10 } = req.query;
     const filter = {};
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const pageSize = Math.max(1, Math.min(100, parseInt(limit) || 10));
+    const skip = (pageNum - 1) * pageSize;
 
     if (typeof category === "string" && category.trim()) {
       filter.category = category.trim();
     }
 
-    const products = await Product.find(filter);
-    res.json(products);
+    const total = await Product.countDocuments(filter);
+    const products = await Product.find(filter).skip(skip).limit(pageSize);
+    const pages = Math.ceil(total / pageSize);
+
+    res.json({
+      data: products,
+      pagination: {
+        total,
+        page: pageNum,
+        pages,
+        limit: pageSize,
+        hasNextPage: pageNum < pages,
+        hasPrevPage: pageNum > 1,
+      },
+    });
   } catch {
     res.status(500).json({ message: "Server error" });
   }

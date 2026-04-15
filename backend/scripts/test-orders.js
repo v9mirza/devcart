@@ -79,7 +79,7 @@ async function run() {
   logStep("Orders flow: admin can list all orders");
   const allOrdersRes = await request("/api/orders", { token: adminToken });
   assertOk(allOrdersRes, "GET /api/orders (admin)");
-  assertTrue(Array.isArray(allOrdersRes.data), "All orders must be an array");
+  assertTrue(Array.isArray(allOrdersRes.data?.data), "All orders must be an array");
 
   logStep("Orders flow: admin mark delivered");
   const deliverRes = await request(`/api/orders/${orderId}/deliver`, {
