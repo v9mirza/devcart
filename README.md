@@ -84,4 +84,4 @@ You can also run them individually:
 - `PUT /api/orders/:id/deliver` (admin)
 
 
-Working on Frontend... with React
+Working on frontend... with React
