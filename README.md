@@ -1,87 +1,85 @@
-# DevCart Backend
+# DevCart
 
-DevCart is a backend-only e-commerce API built with Node.js, Express, and MongoDB.
+Backend API for a small e-commerce flow: accounts, catalog, cart, wishlist, orders, and an AdminJS dashboard.
 
-## What is built
+## Stack
 
-- JWT auth (register, login, protected profile)
-- Role-based access (user/admin)
-- Product APIs (list, get by id, create, update, delete)
-- Order APIs (create, my orders, get by id, mark paid, admin list all, mark delivered)
-- Product seeder with sample data
-- MVP test scripts for health, auth, products, and orders
+Node.js, Express, MongoDB (Mongoose), JWT + bcrypt, AdminJS (session auth via Mongo store).
 
-## Tech stack
+## Features
 
-- Node.js
-- Express
-- MongoDB + Mongoose
-- bcryptjs + jsonwebtoken
+- **Auth** — Register, login (JWT), protected profile (`/api/users/me`).
+- **Roles** — `user` / `admin` for product, order, and category management.
+- **Catalog** — Categories; products with optional `?category=`, `page`, `limit`.
+- **Cart & wishlist** — Per-user cart and wishlist (authenticated).
+- **Orders** — Create, list own orders, pay; admins list all and mark delivered.
+- **Admin UI** — [AdminJS](https://adminjs.co/) at `/admin` for Users, Categories, Products, Orders, Cart, Wishlist.
+- **Data** — Product seeder; MVP-style Node test scripts.
 
-## Environment
+## Prerequisites
 
-Create `backend/.env`:
+- Node.js (LTS recommended)
+- MongoDB running locally or a `MONGO_URI` you can reach
 
-```env
-PORT=5000
-MONGO_URI=mongodb://127.0.0.1:27017/devcart
-JWT_SECRET=replace_with_a_long_random_secret
-API_BASE_URL=http://localhost:5000
-TEST_USER_NAME=MVP Test User
-TEST_USER_EMAIL=devcart.user@example.com
-TEST_USER_PASSWORD=password123
-TEST_ADMIN_NAME=MVP Test Admin
-TEST_ADMIN_EMAIL=devcart.admin@example.com
-TEST_ADMIN_PASSWORD=adminpass123
-```
+## Setup
 
-## Run locally
+1. Copy environment file:
 
-```bash
-cd backend
-npm install
-npm run dev
-```
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
 
-## Seed products
+2. Edit `backend/.env`: at minimum set `MONGO_URI`, `JWT_SECRET`, `API_BASE_URL`, and for `/admin` set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `SESSION_SECRET`. Optional test credentials match `backend/.env.example`.
 
-```bash
-cd backend
-npm run seed
-```
+3. Install and run:
 
-## Test the MVP flows
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
 
-```bash
-cd backend
-npm run test:mvp
-```
+4. Optional — seed sample products:
 
-You can also run them individually:
+   ```bash
+   npm run seed
+   ```
 
-- `npm run test:health`
-- `npm run test:auth`
-- `npm run test:products`
-- `npm run test:orders`
+5. Admin — open `http://localhost:<PORT>/admin` and sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
-## Main API routes
+## Tests
 
-- `GET /api/health`
-- `POST /api/users`
-- `GET /api/users/me`
-- `POST /api/auth/login`
-- `GET /api/products`
-- `GET /api/products?category=Audio` (optional category filter)
-- `GET /api/products/:id`
-- `POST /api/products` (admin)
-- `PUT /api/products/:id` (admin)
-- `DELETE /api/products/:id` (admin)
-- `POST /api/orders`
-- `GET /api/orders/myorders`
-- `GET /api/orders/:id`
-- `PUT /api/orders/:id/pay`
-- `GET /api/orders` (admin)
-- `PUT /api/orders/:id/deliver` (admin)
+From `backend/`:
 
+| Command | Purpose |
+| --- | --- |
+| `npm run test:mvp` | Runs all MVP scripts in sequence |
+| `npm run test:health` | Health check |
+| `npm run test:auth` | Auth flow |
+| `npm run test:products` | Products |
+| `npm run test:orders` | Orders |
+| `npm run test:cart` | Cart |
+| `npm run test:wishlist` | Wishlist |
 
-Working on frontend... with React
+Test users in `.env` (`TEST_USER_*`, `TEST_ADMIN_*`) must match what the scripts expect.
+
+## API overview
+
+Send `Authorization: Bearer <token>` on routes that require auth.
+
+| Area | Routes |
+| --- | --- |
+| **Health** | `GET /api/health` |
+| **Users** | `POST /api/users` (register), `GET /api/users/me` (auth) |
+| **Auth** | `POST /api/auth/login` |
+| **Categories** | `GET /api/categories`, `GET /api/categories/:id`; `POST` / `PUT` / `DELETE` admin |
+| **Products** | `GET /api/products` (`?category=`, `page`, `limit`), `GET /api/products/:id`; `POST` / `PUT` / `DELETE` admin |
+| **Cart** | `GET /api/cart`, `POST /api/cart`, `PUT /api/cart/:productId`, `DELETE /api/cart`, `DELETE /api/cart/:productId` (auth) |
+| **Wishlist** | `GET /api/wishlist`, `POST /api/wishlist/toggle`, `DELETE /api/wishlist` (auth) |
+| **Orders** | `POST /api/orders`, `GET /api/orders/myorders`, `GET /api/orders/:id`, `PUT /api/orders/:id/pay` (auth); `GET /api/orders`, `PUT /api/orders/:id/deliver` (admin) |
+
+Production: use `npm start` (runs `node server.js`).
+
+## Frontend
+
+React client in progress (not documented in this repo yet).
