@@ -140,6 +140,11 @@ const productTemplates = [
   },
 ];
 
+const seedDatabase = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB connected for seeding");
+
     // Clear existing categories and products
     await Category.deleteMany();
     await Product.deleteMany();
