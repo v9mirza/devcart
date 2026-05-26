@@ -4,6 +4,7 @@ import BentoGrid from '../components/BentoGrid'
 import CatalogSection from '../components/CatalogSection'
 import ProductModal from '../components/ProductModal'
 import CartDrawer from '../components/CartDrawer'
+import WishlistDrawer from '../components/WishlistDrawer'
 import { useCart } from '../context/CartContext'
 
 export default function HomePage() {
@@ -26,9 +27,10 @@ export default function HomePage() {
         <p>&copy; {new Date().getFullYear()} DevCart Inc. All rights reserved.</p>
       </footer>
 
-      {/* Modals & Cart Drawer */}
+      {/* Modals, Cart & Wishlist Drawers */}
       <ProductModal />
       <CartDrawer />
+      <WishlistDrawer />
 
       {/* CHECKOUT SUCCESS MODAL */}
       {showCheckoutSuccess && (

@@ -7,7 +7,9 @@ export default function ProductModal() {
     colorsMap,
     getProductImage,
     getProductColors,
-    addToCart
+    addToCart,
+    toggleWishlist,
+    isProductInWishlist
   } = useCart()
 
   if (!activeProductDetail) return null
@@ -81,7 +83,7 @@ export default function ProductModal() {
           </div>
 
           {/* Add to Cart Actions */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
             <button
               onClick={() => addToCart(
                 activeProductDetail, 
@@ -92,6 +94,21 @@ export default function ProductModal() {
             >
               Add to Cart
             </button>
+            
+            <button
+              onClick={() => toggleWishlist(activeProductDetail)}
+              className={`w-12 h-12 rounded-full border transition-all active:scale-95 hover:scale-105 cursor-pointer flex items-center justify-center ${
+                isProductInWishlist(activeProductDetail._id || activeProductDetail.id)
+                  ? 'bg-rose-50 border-rose-200 text-rose-500'
+                  : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
+              }`}
+              aria-label="Toggle wishlist"
+            >
+              <svg className="w-5 h-5" fill={isProductInWishlist(activeProductDetail._id || activeProductDetail.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+
             <button
               onClick={() => setActiveProductDetail(null)}
               className="px-5 py-3 border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 font-bold rounded-full cursor-pointer transition-colors"

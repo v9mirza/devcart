@@ -9,7 +9,9 @@ export default function CatalogSection() {
     categoryIdToNameMap,
     getProductImage,
     setActiveProductDetail,
-    catalogRef
+    catalogRef,
+    toggleWishlist,
+    isProductInWishlist
   } = useCart()
 
   return (
@@ -56,6 +58,24 @@ export default function CatalogSection() {
                 <span className="absolute top-3 left-3 bg-stone-100/80 backdrop-blur-xs text-[10px] text-stone-500 font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
                   {categoryIdToNameMap[prod.category] || prod.category}
                 </span>
+                
+                {/* Floating Heart Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    toggleWishlist(prod)
+                  }}
+                  className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-sm active:scale-90 hover:scale-105 cursor-pointer ${
+                    isProductInWishlist(getProductId(prod))
+                      ? 'bg-rose-50 text-rose-500 border border-rose-100'
+                      : 'bg-white/80 backdrop-blur-xs text-stone-500 hover:text-slate-800 border border-stone-200/30'
+                  }`}
+                  aria-label="Add to wishlist"
+                >
+                  <svg className="w-4 h-4" fill={isProductInWishlist(getProductId(prod)) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </button>
               </div>
 
               {/* Product Details */}

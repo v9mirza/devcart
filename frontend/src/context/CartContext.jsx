@@ -96,6 +96,8 @@ export function CartProvider({ children }) {
   // E-commerce state variables
   const [cart, setCart] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [wishlist, setWishlist] = useState([])
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [activeProductDetail, setActiveProductDetail] = useState(null)
@@ -274,10 +276,74 @@ export function CartProvider({ children }) {
     }
   }
 
-  // Fetch db cart on login or when products list finishes loading
+  // Helper to fetch wishlist from backend
+  const fetchWishlist = async () => {
+    const token = localStorage.getItem('devcart_token')
+    if (!token || !user) return
+    try {
+      const res = await fetch('http://localhost:5000/api/wishlist', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setWishlist(data.products || [])
+      } else if (res.status === 401) {
+        logout()
+      }
+    } catch (err) {
+      console.warn('Failed to fetch wishlist, offline fallback mode active.', err)
+    }
+  }
+
+  const toggleWishlist = async (product) => {
+    const token = localStorage.getItem('devcart_token')
+    if (!token || !user) {
+      alert('Please sign in to add items to your wishlist.')
+      return
+    }
+    
+    // Optimistic UI update
+    const productId = getProductId(product)
+    const exists = wishlist.some((item) => getProductId(item) === productId)
+    if (exists) {
+      setWishlist((prev) => prev.filter((item) => getProductId(item) !== productId))
+    } else {
+      setWishlist((prev) => [...prev, product])
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/wishlist/toggle', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ productId })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setWishlist(data.wishlist.products || [])
+      } else if (res.status === 401) {
+        logout()
+      }
+    } catch (err) {
+      console.error('Failed to toggle wishlist item', err)
+    }
+  }
+
+  const isProductInWishlist = (productId) => {
+    return wishlist.some((item) => getProductId(item) === productId)
+  }
+
+  // Fetch db cart and wishlist on login or when products list finishes loading
   useEffect(() => {
     if (products.length > 0 && user) {
       fetchDbCart()
+      fetchWishlist()
+    } else {
+      setWishlist([])
     }
   }, [products, user])
 
@@ -398,6 +464,7 @@ export function CartProvider({ children }) {
     localStorage.removeItem('devcart_user')
     setUser(null)
     setCart([])
+    setWishlist([])
   }
 
   const updateProfile = async (profileData) => {
@@ -438,6 +505,12 @@ export function CartProvider({ children }) {
         login,
         logout,
         updateProfile,
+        wishlist,
+        setWishlist,
+        isWishlistOpen,
+        setIsWishlistOpen,
+        toggleWishlist,
+        isProductInWishlist,
         isCartOpen,
         setIsCartOpen,
         searchQuery,
