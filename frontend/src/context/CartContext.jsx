@@ -400,6 +400,32 @@ export function CartProvider({ children }) {
     setCart([])
   }
 
+  const updateProfile = async (profileData) => {
+    const token = localStorage.getItem('devcart_token')
+    if (!token || !user) return false
+    try {
+      const res = await fetch('http://localhost:5000/api/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(profileData)
+      })
+      if (res.ok) {
+        const updatedUser = await res.json()
+        localStorage.setItem('devcart_user', JSON.stringify(updatedUser))
+        setUser(updatedUser)
+        return true
+      } else if (res.status === 401) {
+        logout()
+      }
+    } catch (err) {
+      console.error('Failed to update profile', err)
+    }
+    return false
+  }
+
   return (
     <CartContext.Provider
       value={{
@@ -411,6 +437,7 @@ export function CartProvider({ children }) {
         user,
         login,
         logout,
+        updateProfile,
         isCartOpen,
         setIsCartOpen,
         searchQuery,

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart, getProductId } from '../context/CartContext'
 
@@ -11,13 +11,24 @@ export default function CheckoutPage() {
     cartTotal,
     handleCheckout,
     getProductImage,
-    logout
+    logout,
+    user
   } = useCart()
 
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [postalCode, setPostalCode] = useState('')
   const [country, setCountry] = useState('')
+
+  // Pre-fill shipping address details if saved in user profile
+  useEffect(() => {
+    if (user && user.shippingAddress) {
+      setAddress(user.shippingAddress.address || '')
+      setCity(user.shippingAddress.city || '')
+      setPostalCode(user.shippingAddress.postalCode || '')
+      setCountry(user.shippingAddress.country || '')
+    }
+  }, [user])
   const [paymentMethod] = useState('Cash On Delivery')
   
   const [loading, setLoading] = useState(false)

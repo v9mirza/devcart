@@ -3,10 +3,43 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
 export default function ProfilePage() {
-  const { user, logout } = useCart()
+  const { user, logout, updateProfile } = useCart()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+
+  // Shipping Address input states
+  const [address, setAddress] = useState(user?.shippingAddress?.address || '')
+  const [city, setCity] = useState(user?.shippingAddress?.city || '')
+  const [postalCode, setPostalCode] = useState(user?.shippingAddress?.postalCode || '')
+  const [country, setCountry] = useState(user?.shippingAddress?.country || '')
+
+  const [saving, setSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+
+  // Sync address form states when user context updates
+  useEffect(() => {
+    if (user && user.shippingAddress) {
+      setAddress(user.shippingAddress.address || '')
+      setCity(user.shippingAddress.city || '')
+      setPostalCode(user.shippingAddress.postalCode || '')
+      setCountry(user.shippingAddress.country || '')
+    }
+  }, [user])
+
+  const handleSaveAddress = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    setSaveSuccess(false)
+    const success = await updateProfile({
+      shippingAddress: { address, city, postalCode, country }
+    })
+    setSaving(false)
+    if (success) {
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    }
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('devcart_token')
@@ -113,6 +146,77 @@ export default function ProfilePage() {
             {user.isAdmin ? 'Admin Account' : 'Customer Account'}
           </span>
         </div>
+      </div>
+
+      {/* Default Shipping Address Form */}
+      <div className="bg-stone-50 p-6 rounded-3xl border border-stone-150/40 flex flex-col gap-4">
+        <div>
+          <h3 className="text-lg font-black text-slate-900">Default Shipping Address</h3>
+          <p className="text-xs text-stone-400 font-medium mt-0.5">Used to automatically fill your details during checkout.</p>
+        </div>
+
+        {saveSuccess && (
+          <div className="bg-green-50 border border-green-200 text-green-600 text-xs font-bold px-4 py-2.5 rounded-xl">
+            Address saved successfully!
+          </div>
+        )}
+
+        <form onSubmit={handleSaveAddress} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold text-slate-800 uppercase tracking-wider pl-1">Street Address</label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="123 Main Street"
+              className="bg-white border border-stone-200 pl-4 pr-4 py-2.5 rounded-full text-xs font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300"
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-col gap-1 col-span-2">
+              <label className="text-[10px] font-bold text-slate-800 uppercase tracking-wider pl-1">City</label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Mumbai"
+                className="bg-white border border-stone-200 pl-4 pr-4 py-2.5 rounded-full text-xs font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-bold text-slate-800 uppercase tracking-wider pl-1">Postal Code</label>
+              <input
+                type="text"
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+                placeholder="400001"
+                className="bg-white border border-stone-200 pl-4 pr-4 py-2.5 rounded-full text-xs font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-[10px] font-bold text-slate-800 uppercase tracking-wider pl-1">Country</label>
+            <input
+              type="text"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              placeholder="India"
+              className="bg-white border border-stone-200 pl-4 pr-4 py-2.5 rounded-full text-xs font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300"
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold px-6 py-2.5 rounded-full shadow-sm cursor-pointer transition-transform hover:scale-[1.01] active:scale-99 disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save Address'}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Orders List */}

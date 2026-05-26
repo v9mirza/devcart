@@ -47,6 +47,7 @@ exports.createUser = async (req, res) => {
         name: user.name,
         email: user.email,
         createdAt: user.createdAt,
+        shippingAddress: user.shippingAddress || { address: "", city: "", postalCode: "", country: "" },
       },
     });
   } catch (err) {
@@ -69,6 +70,49 @@ exports.getMe = async (req, res) => {
 
     res.json(user);
   } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// PUT /api/users/profile
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (req.body.name) user.name = req.body.name;
+    if (req.body.email) user.email = req.body.email.toLowerCase();
+    
+    if (req.body.password) {
+      const bcrypt = require("bcryptjs");
+      user.password = await bcrypt.hash(req.body.password, 10);
+    }
+
+    if (req.body.shippingAddress) {
+      user.shippingAddress = {
+        address: req.body.shippingAddress.address || "",
+        city: req.body.shippingAddress.city || "",
+        postalCode: req.body.shippingAddress.postalCode || "",
+        country: req.body.shippingAddress.country || "",
+      };
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      isAdmin: updatedUser.isAdmin,
+      shippingAddress: updatedUser.shippingAddress || { address: "", city: "", postalCode: "", country: "" },
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
     res.status(500).json({ message: "Server error" });
   }
 };
