@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 // POST /api/users
 exports.createUser = async (req, res) => {
@@ -33,11 +34,20 @@ exports.createUser = async (req, res) => {
       password: hashedPassword,
     });
 
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     res.status(201).json({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      createdAt: user.createdAt,
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
     });
   } catch (err) {
     if (err.code === 11000) {
