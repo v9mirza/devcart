@@ -27,11 +27,21 @@ export default function Header() {
           placeholder="Search products..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-white border border-stone-200/60 pl-5 pr-14 py-2.5 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all shadow-sm"
+          className="bg-white/90 border border-stone-200/80 pl-5 pr-24 py-2.5 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all shadow-sm"
         />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery('')}
+            className="absolute right-12 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 text-xs font-bold cursor-pointer"
+            aria-label="Clear search"
+          >
+            Clear
+          </button>
+        )}
         <button
           type="button"
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 bg-slate-900 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-slate-800 transition-colors"
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 bg-slate-950 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-slate-800 transition-colors"
           aria-label="Search"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +54,7 @@ export default function Header() {
       <div className="flex items-center gap-2.5 justify-self-end">
         <button
           onClick={() => setIsCartOpen(true)}
-          className="w-10 h-10 bg-white border border-stone-200/60 rounded-full flex items-center justify-center text-slate-800 hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all shadow-sm relative cursor-pointer"
+          className="w-10 h-10 bg-white/95 border border-stone-200/70 rounded-full flex items-center justify-center text-slate-800 hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all shadow-sm relative cursor-pointer"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -61,7 +71,7 @@ export default function Header() {
           className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all shadow-sm active:scale-95 hover:scale-105 cursor-pointer relative ${
             wishlist.length > 0
               ? 'bg-rose-50 border-rose-200 text-rose-500'
-              : 'bg-white border-stone-200/50 text-slate-800 hover:bg-slate-50'
+              : 'bg-white/95 border-stone-200/70 text-slate-800 hover:bg-slate-50'
           }`}
         >
           <svg className="w-5 h-5" fill={wishlist.length > 0 ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -74,20 +84,17 @@ export default function Header() {
           )}
         </button>
 
-        {user ? (
-          <Link to="/profile" className="flex items-center gap-2 px-3 py-1.5 bg-white border border-stone-200/60 rounded-full shadow-sm hover:bg-slate-50 hover:scale-[1.02] active:scale-98 transition-all">
-            <span className="text-xs font-semibold text-slate-700 hidden sm:inline">{user.name}</span>
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"
-              className="w-7 h-7 rounded-full object-cover"
-              alt={`${user.name} avatar`}
-            />
-          </Link>
-        ) : (
-          <Link to="/login" className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-full shadow-sm hover:scale-[1.02] active:scale-98 transition-all cursor-pointer">
-            Sign In
-          </Link>
-        )}
+        <Link
+          to={user ? '/profile' : '/login'}
+          className="flex items-center gap-2 px-3 py-1.5 bg-white/95 border border-stone-200/70 rounded-full shadow-sm hover:bg-slate-50 hover:scale-[1.02] active:scale-98 transition-all"
+        >
+          <span className="text-xs font-semibold text-slate-700">{user?.name || 'Guest User'}</span>
+          <img
+            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"
+            className="w-7 h-7 rounded-full object-cover"
+            alt={`${user?.name || 'Guest'} avatar`}
+          />
+        </Link>
       </div>
     </header>
   )

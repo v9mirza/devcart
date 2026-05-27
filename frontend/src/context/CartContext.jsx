@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useMemo, useEffect, useRef } from 'react'
+import vrHeadset from '../assets/vr_headset.png'
 import blueHeadphones from '../assets/blue_headphones.png'
 import wirelessEarbuds from '../assets/wireless_earbuds.png'
-import vrHeadset from '../assets/vr_headset.png'
 
 const CartContext = createContext()
 
@@ -113,6 +113,11 @@ export function CartProvider({ children }) {
     catalogRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const openProductDetail = (product, event) => {
+    if (!product) return
+    setActiveProductDetail(product)
+  }
+
   // Fetch products and categories on component mount
   useEffect(() => {
     const fetchData = async () => {
@@ -206,12 +211,17 @@ export function CartProvider({ children }) {
   // Prefer real product URLs from the database; only fall back to local assets offline.
   const getProductImage = (product) => {
     if (!product) return ''
+    const productName = String(product.name || '').toLowerCase()
+
+    // Keep New Gen X-Bud image consistent with local design asset.
+    if (productName.includes('new gen x-bud') || productName.includes('x-bud')) {
+      return wirelessEarbuds
+    }
+
     if (typeof product.image === 'string' && /^https?:\/\//.test(product.image)) {
       return product.image
     }
-    if (product.image === blueHeadphones) return blueHeadphones
-    if (product.image === wirelessEarbuds) return wirelessEarbuds
-    if (product.image === vrHeadset) return vrHeadset
+    // If image is a module import (bundled asset), it will be a string path too — return as-is.
     return product.image || ''
   }
 
@@ -569,6 +579,7 @@ export function CartProvider({ children }) {
         setSelectedCategory,
         activeProductDetail,
         setActiveProductDetail,
+        openProductDetail,
         spotlightColor,
         setSpotlightColor,
         likes,

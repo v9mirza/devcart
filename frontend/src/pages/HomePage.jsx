@@ -12,26 +12,42 @@ export default function HomePage() {
 
   return (
     <div className="w-full min-h-screen py-5 px-3 md:px-6 flex justify-center items-start">
-      <div className="w-full max-w-[1380px] bg-[#f4f5ef] rounded-[36px] border border-stone-200/60 shadow-[0_32px_80px_-24px_rgba(20,24,36,0.22)] p-4 md:p-7 flex flex-col gap-8 relative">
-      
-      {/* Navigation / Header */}
-      <Header />
+      <div className="w-full max-w-[1280px] bg-[#edf1e7] rounded-[34px] border border-[#d8ddd4] shadow-[0_22px_60px_-26px_rgba(20,24,36,0.22)] p-4 md:p-6 flex flex-col gap-8 relative overflow-hidden">
+        <div className="relative z-10 flex flex-col gap-8">
+          {/* Navigation / Header */}
+          <Header />
 
-      {/* Bento Grid */}
-      <BentoGrid />
+          {/* Bento Grid */}
+          <BentoGrid />
 
-      {/* Catalog Grid */}
-      <CatalogSection />
+          <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { title: 'Fast shipping', text: 'Dispatch in 24h for most products.' },
+              { title: 'Secure payments', text: 'Encrypted checkout and trusted gateways.' },
+              { title: 'Easy returns', text: 'Simple return flow with quick support.' }
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="bg-white/75 border border-stone-200/70 rounded-2xl p-4 shadow-sm"
+              >
+                <h3 className="text-sm font-extrabold text-slate-800">{item.title}</h3>
+                <p className="text-xs text-stone-500 mt-1 font-medium">{item.text}</p>
+              </div>
+            ))}
+          </section>
 
-      {/* Footer */}
-      <footer className="py-6 border-t border-stone-200/50 text-center text-xs text-stone-400 font-medium">
-        <p>&copy; {new Date().getFullYear()} DevCart Inc. All rights reserved.</p>
-      </footer>
+          {/* Catalog Grid */}
+          <CatalogSection />
 
-      {/* Modals, Cart & Wishlist Drawers */}
-      <ProductModal />
-      <CartDrawer />
-      <WishlistDrawer />
+          {/* Footer */}
+          <footer className="pt-5 border-t border-stone-200/60 text-center text-xs text-stone-400 font-medium">
+            <p>&copy; {new Date().getFullYear()} DevCart Inc. All rights reserved.</p>
+          </footer>
+
+          {/* Modals, Cart & Wishlist Drawers */}
+          <ProductModal />
+          <CartDrawer />
+          <WishlistDrawer />
 
       {/* CHECKOUT SUCCESS MODAL */}
       {showCheckoutSuccess && (
@@ -42,7 +58,11 @@ export default function HomePage() {
           />
 
           <div className="bg-[#fcfcf9] rounded-[32px] w-full max-w-sm border border-stone-200/50 shadow-2xl relative overflow-hidden z-10 p-8 flex flex-col items-center text-center">
-            <span className="text-5xl mb-4 animate-bounce">🎉</span>
+            <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-4">
+              <svg className="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
             <h2 className="text-2xl font-black text-slate-900 mb-2">Order Confirmed!</h2>
             <p className="text-xs text-stone-500 font-medium leading-relaxed mb-6">
               Thank you for shopping with DevCart. Your simulation order has been processed successfully.
@@ -57,6 +77,7 @@ export default function HomePage() {
         </div>
       )}
 
+        </div>
       </div>
     </div>
   )

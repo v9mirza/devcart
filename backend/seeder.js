@@ -22,7 +22,7 @@ const productTemplates = [
     name: "Sequoia Inspiring Musico",
     description: "Experience professional acoustic engineering. Built with dynamic 40mm drivers, active noise cancellation, and soft memory-foam cups for hours of luxurious listening.",
     price: 299,
-    image: "https://images.unsplash.com/photo-1612858249784-5883876e0d52?auto=format&fit=crop&q=80&w=1200",
+    image: "https://source.unsplash.com/Rsc0K8_fsJY/1200x800",
     category: "Audio",
     countInStock: 15,
   },

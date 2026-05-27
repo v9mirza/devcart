@@ -5,8 +5,8 @@
 }
 
 body {
-  /* Neutral page background like the reference */
-  background: #ddddd5;
+  /* Single-color homepage theme */
+  background: #edf1e7;
   min-height: 100vh;
   color: #111827;
 }

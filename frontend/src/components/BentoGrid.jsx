@@ -1,10 +1,12 @@
 import { useCart, getProductId } from '../context/CartContext'
+import blueHeadphones from '../assets/blue_headphones.png'
 
 const EARBUD_FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1636093973985-4fe333d36de9?auto=format&fit=crop&q=80&w=900'
 
 export default function BentoGrid() {
   const {
+    loading,
     products,
     spotlightProduct,
     spotlightColor,
@@ -17,6 +19,8 @@ export default function BentoGrid() {
   } = useCart()
 
   const spotlightSoundName = spotlightProduct?.name?.split(' ')[0] || 'Sequoia'
+  const spotlightRating = Number(spotlightProduct?.rating || 4.8).toFixed(1)
+  const spotlightColors = spotlightProduct ? getProductColors(spotlightProduct) : []
 
   // Pick specific DB products so the UI matches the reference screenshot.
   const earbudCardProduct =
@@ -58,101 +62,135 @@ export default function BentoGrid() {
     </svg>
   )
 
+  const HeroSkeleton = () => (
+    <div
+      className="rounded-[28px] overflow-hidden relative border border-stone-200/70 bg-[#f7f7f4] animate-pulse"
+      style={{ minHeight: 460 }}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+        <div className="p-7 md:p-9 flex flex-col justify-between gap-6">
+          <div>
+            <div className="h-7 w-40 bg-stone-200/70 rounded-full mb-6" />
+            <div className="h-12 md:h-14 w-5/6 bg-stone-200/70 rounded-2xl mb-5" />
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-14 bg-stone-200/60 rounded-xl" />
+              <div className="flex-1">
+                <div className="h-4 w-32 bg-stone-200/70 rounded mb-2" />
+                <div className="h-3 w-full bg-stone-200/60 rounded mb-2" />
+                <div className="h-3 w-2/3 bg-stone-200/60 rounded" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="h-11 w-44 bg-stone-200/70 rounded-full mb-4" />
+            <div className="h-4 w-56 bg-stone-200/60 rounded" />
+          </div>
+        </div>
+        <div className="relative flex items-center justify-center min-h-[280px]">
+          <div className="w-[320px] h-[320px] md:w-[380px] md:h-[380px] bg-stone-200/60 rounded-[44px]" />
+        </div>
+      </div>
+    </div>
+  )
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
 
       {/* ══════════ LEFT BLOCK ══════════ */}
       <div className="flex flex-col gap-4">
 
-        {/* ─── DARK SPOTLIGHT HERO ─── */}
-        {spotlightProduct && (
+        {/* ─── HERO ─── */}
+        {loading ? (
+          <HeroSkeleton />
+        ) : (
+          spotlightProduct && (
           <div
             className="rounded-[28px] overflow-hidden relative flex flex-col md:flex-row border border-stone-200/70"
             style={{
-              background: '#f7f7f4',
-              minHeight: 395
+              background: '#f5f7f3',
+              minHeight: 460
             }}
           >
             {/* Ambient glow blobs */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="absolute -top-16 -left-16 w-72 h-72 rounded-full" style={{background:'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 72%)'}} />
+              <div className="absolute -top-16 -left-16 w-72 h-72 rounded-full" style={{background:'radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 72%)'}} />
               <div className="absolute -bottom-20 left-1/3 w-72 h-72 rounded-full" style={{background:'radial-gradient(circle, rgba(20,24,36,0.03) 0%, transparent 70%)'}} />
             </div>
 
-            {/* LEFT: Text content */}
+            {/* LEFT: focused value proposition */}
             <div className="relative z-10 flex flex-col justify-between p-7 md:p-9 flex-1 min-w-0">
               <div>
-                {/* Label tag */}
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-stone-500 mb-5 border border-stone-200 px-3 py-1.5 rounded-full bg-white/70">
                   <svg className="w-3 h-3 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
-                  Music is Classic
+                  Premium audio experience
                 </span>
 
-                {/* Headline */}
-                <h1 className="text-4xl md:text-[52px] font-black text-slate-900 tracking-tight leading-[1.05] mb-6">
+                <h1 className="text-4xl md:text-[54px] font-black text-slate-900 tracking-tight leading-[1.03] mb-4">
                   {spotlightProduct.name}
                 </h1>
+                <p className="text-sm md:text-[15px] text-stone-600 font-medium leading-relaxed max-w-[460px]">
+                  Discover richer sound, better comfort, and modern design built for everyday listening with {spotlightSoundName}.
+                </p>
 
-                {/* 01 section */}
-                <div className="flex items-start gap-4 mb-8">
-                  <span className="text-[42px] font-black text-slate-300/70 leading-none flex-shrink-0 mt-0">01</span>
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className="w-8 h-px bg-stone-300 mt-[13px] flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-bold text-slate-700 mb-1">Clear Sounds</p>
-                      <p className="text-xs text-stone-500 font-medium leading-relaxed line-clamp-2 max-w-[270px]">
-                        Clear Sounds. Making your dream music come true stay with {spotlightSoundName} Sounds!
-                      </p>
-                    </div>
-                  </div>
+                <div className="flex flex-wrap items-center gap-2.5 mt-6">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-white border border-stone-200 px-2.5 py-1 rounded-full">
+                    ★ {spotlightRating}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-white border border-stone-200 px-2.5 py-1 rounded-full">
+                    ${spotlightProduct.price}
+                  </span>
+                  {spotlightProduct.countInStock !== undefined && (
+                    <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border ${
+                      spotlightProduct.countInStock === 0
+                        ? 'text-red-600 bg-red-50 border-red-100'
+                        : spotlightProduct.countInStock <= 5
+                        ? 'text-amber-600 bg-amber-50 border-amber-100'
+                        : 'text-emerald-600 bg-emerald-50 border-emerald-100'
+                    }`}>
+                      {spotlightProduct.countInStock === 0
+                        ? 'Out of stock'
+                        : spotlightProduct.countInStock <= 5
+                        ? `${spotlightProduct.countInStock} left`
+                        : 'In stock'}
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div className="flex flex-col gap-4">
-                {/* CTA button */}
-                <div>
+                <div className="flex items-center gap-3 flex-wrap">
                   <button
                     onClick={scrollToCatalog}
                     className="bg-[#d9f662] hover:bg-[#ceef53] text-slate-950 font-bold px-5 py-3 rounded-full inline-flex items-center gap-3 transition-all duration-200 hover:scale-[1.03] active:scale-95 cursor-pointer shadow-lg shadow-lime-300/20"
                   >
-                    View All Products
+                    Shop Collection
                     <span className="w-7 h-7 rounded-full bg-slate-950 text-white flex items-center justify-center">
                       <ArrowIcon />
                     </span>
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveProductDetail(spotlightProduct)}
+                    className="bg-white hover:bg-stone-50 text-slate-800 border border-stone-200 font-bold px-5 py-3 rounded-full inline-flex items-center gap-2 transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                  >
+                    View Product
+                  </button>
                 </div>
-
-                {/* Social + pagination */}
-                <div className="flex items-center justify-between gap-3 text-stone-500">
-                  <div className="flex items-center gap-3">
-                  {[
-                    'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z',
-                    'M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z',
-                    'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z',
-                    'M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z'
-                  ].map((path, i) => (
-                    <svg key={i} className="w-3.5 h-3.5 hover:text-slate-700 transition-colors cursor-pointer" fill="currentColor" viewBox="0 0 24 24">
-                      <path d={path}/>
-                    </svg>
-                  ))}
-                  </div>
-                  <div className="flex items-center gap-2 text-stone-400">
-                    <button type="button" className="w-7 h-7 rounded-full border border-stone-200 flex items-center justify-center hover:bg-white transition-colors cursor-pointer" aria-label="Previous">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                    <span className="text-[11px] font-bold text-stone-500">01</span>
-                    <button type="button" className="w-7 h-7 rounded-full border border-stone-200 flex items-center justify-center hover:bg-white transition-colors cursor-pointer" aria-label="Next">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                  </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] font-semibold text-stone-600 bg-white/80 border border-stone-200 px-2.5 py-1 rounded-full">
+                    Free shipping over $350
+                  </span>
+                  <span className="text-[11px] font-semibold text-stone-600 bg-white/80 border border-stone-200 px-2.5 py-1 rounded-full">
+                    2-year warranty
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* RIGHT: Product image stage */}
-            <div className="relative w-full md:w-[52%] flex items-center justify-center overflow-hidden min-h-[280px]">
+            <div className="relative w-full md:w-[54%] flex items-center justify-center overflow-hidden min-h-[280px]">
               {/* Multi-layer glows */}
               <div className="absolute w-72 h-72 rounded-full blur-3xl" style={{background:'radial-gradient(circle, rgba(96,165,250,0.17) 0%, transparent 70%)'}} />
               <div className="absolute w-48 h-48 rounded-full blur-2xl" style={{background:'radial-gradient(circle, rgba(2,132,199,0.1) 0%, transparent 70%)'}} />
@@ -162,18 +200,18 @@ export default function BentoGrid() {
               <div className="absolute bottom-20 left-6 w-5 h-5 bg-stone-100 rounded-full border border-stone-300/70" />
               <div className="absolute bottom-10 right-24 w-3 h-3 bg-slate-300 rounded-full" />
               <div className="absolute top-1/2 right-1/2 w-2 h-2 bg-slate-300 rounded-full" />
-              {/* Floating product image */}
-              <img
-                src={getProductImage(spotlightProduct)}
-                className="relative z-10 w-[300px] h-[300px] md:w-[360px] md:h-[360px] object-cover cursor-pointer hover:scale-105 transition-transform duration-700"
-                style={{
-                  filter:
-                    'drop-shadow(0 0 26px rgba(59,130,246,0.22)) drop-shadow(0 18px 36px rgba(15,23,42,0.15))',
-                  transform: 'translateY(8px)'
-                }}
-                onClick={() => setActiveProductDetail(spotlightProduct)}
-                alt={spotlightProduct.name}
-              />
+              <div className="relative z-10 w-[86%] max-w-[500px] rounded-[26px] border border-stone-200/80 bg-white/60 backdrop-blur-sm p-4 md:p-5 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.35)]">
+                <img
+                  src={getProductImage(spotlightProduct)}
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = blueHeadphones }}
+                  className="w-full aspect-square object-contain cursor-pointer hover:scale-[1.03] transition-transform duration-700"
+                  style={{
+                    filter: 'drop-shadow(0 0 24px rgba(59,130,246,0.2)) drop-shadow(0 16px 30px rgba(15,23,42,0.16))'
+                  }}
+                  onClick={() => setActiveProductDetail(spotlightProduct)}
+                  alt={spotlightProduct.name}
+                />
+              </div>
 
               {/* Top-right open product control (matches reference). */}
               <button
@@ -188,20 +226,24 @@ export default function BentoGrid() {
                 <ArrowIcon />
               </button>
               {/* Color selector pills at bottom of image area */}
-              <div className="absolute bottom-5 right-0 left-0 flex justify-center gap-2">
-                {getProductColors(spotlightProduct).map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setSpotlightColor(c)}
-                    className={`w-3 h-3 rounded-full ${colorsMap[c]} border transition-all duration-200 cursor-pointer ${
-                      spotlightColor === c ? 'border-slate-600 scale-125 shadow-sm' : 'border-stone-300 opacity-60 hover:opacity-100'
-                    }`}
-                    aria-label={c}
-                  />
-                ))}
+              <div className="absolute bottom-5 right-0 left-0 flex justify-center">
+                <div className="inline-flex items-center gap-2 bg-white/85 border border-stone-200 rounded-full px-3 py-1.5 shadow-sm">
+                  <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Colors</span>
+                  {spotlightColors.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setSpotlightColor(c)}
+                      className={`w-3 h-3 rounded-full ${colorsMap[c]} border transition-all duration-200 cursor-pointer ${
+                        spotlightColor === c ? 'border-slate-600 scale-125 shadow-sm' : 'border-stone-300 opacity-70 hover:opacity-100'
+                      }`}
+                      aria-label={c}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+          )
         )}
 
         {/* ─── BOTTOM ROW (3 cards) ─── */}
@@ -210,7 +252,7 @@ export default function BentoGrid() {
           {/* More Products */}
           <div
             onClick={scrollToCatalog}
-            className="bg-[#f7f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5"
+            className="bg-[#f6f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5"
           >
             <div className="flex justify-between items-start">
               <div>
@@ -231,7 +273,7 @@ export default function BentoGrid() {
           </div>
 
           {/* Downloads / social stats card */}
-          <div className="bg-[#f7f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5">
+          <div className="bg-[#f6f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex -space-x-2">
                 {smallCardProducts.map((prod, i) => (
@@ -274,7 +316,7 @@ export default function BentoGrid() {
           {earbudCardProduct ? (
             <div
               onClick={() => setActiveProductDetail(earbudCardProduct)}
-              className="bg-[#f7f7f2] rounded-[22px] border border-stone-200/70 shadow-sm min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 relative overflow-hidden group"
+              className="bg-[#f6f7f2] rounded-[22px] border border-stone-200/70 shadow-sm min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 relative overflow-hidden group"
             >
               <div className="flex justify-between items-start gap-3 p-5 pb-0 relative z-10">
                 <span className="text-[10px] font-extrabold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full inline-flex items-center gap-1 border border-rose-100">
@@ -323,7 +365,7 @@ export default function BentoGrid() {
 
         {/* Popular Colors */}
         {spotlightProduct && (
-          <div className="bg-[#f8f8f4] rounded-[22px] p-5 border border-stone-200/70 shadow-sm">
+          <div className="bg-[#f6f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm">
             <h3 className="text-sm font-extrabold text-slate-800 mb-3">Popular Colors</h3>
             <div className="flex gap-2.5 flex-wrap">
               {getProductColors(spotlightProduct).map((c) => (
