@@ -5,6 +5,7 @@
 }
 
 body {
+  /* Neutral page background like the reference */
   background: #ddddd5;
   min-height: 100vh;
   color: #111827;

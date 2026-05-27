@@ -203,25 +203,16 @@ export function CartProvider({ children }) {
     'rose-gold': 'bg-rose-200 ring-rose-200/30'
   }
 
-  // Image resolver to map placeholders to custom local files
+  // Prefer real product URLs from the database; only fall back to local assets offline.
   const getProductImage = (product) => {
     if (!product) return ''
+    if (typeof product.image === 'string' && /^https?:\/\//.test(product.image)) {
+      return product.image
+    }
     if (product.image === blueHeadphones) return blueHeadphones
     if (product.image === wirelessEarbuds) return wirelessEarbuds
     if (product.image === vrHeadset) return vrHeadset
-
-    const nameLower = product.name.toLowerCase()
-    if (nameLower.includes('headphone') && !nameLower.includes('surface') && !nameLower.includes('studio')) {
-      return blueHeadphones
-    }
-    if (nameLower.includes('earbud') || nameLower.includes('x-bud')) {
-      return wirelessEarbuds
-    }
-    if (nameLower.includes('vr') || nameLower.includes('glass') || nameLower.includes('headset')) {
-      return vrHeadset
-    }
-
-    return product.image
+    return product.image || ''
   }
 
   const getProductColors = (product) => {

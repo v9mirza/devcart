@@ -1,33 +1,21 @@
-import { useMemo } from 'react'
 import { useCart, getProductId } from '../context/CartContext'
+
+const EARBUD_FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1636093973985-4fe333d36de9?auto=format&fit=crop&q=80&w=900'
 
 export default function BentoGrid() {
   const {
     products,
-    categories,
     spotlightProduct,
     spotlightColor,
     setSpotlightColor,
     colorsMap,
     getProductImage,
     getProductColors,
-    addToCart,
     setActiveProductDetail,
-    categoryIdToNameMap,
     scrollToCatalog
   } = useCart()
 
-  const newestProduct = useMemo(() =>
-    products.length > 0
-      ? [...products].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0]
-      : null
-  , [products])
-
-  const catCount = Math.max(0, (categories?.length || 1) - 1)
-  const avgRating = products.length
-    ? (products.reduce((acc, p) => acc + (p.rating ? Number(p.rating) : 0), 0) / products.length)
-    : 4.7
-  const ratingText = Number.isFinite(avgRating) && avgRating > 0 ? avgRating.toFixed(1) : '4.7'
   const spotlightSoundName = spotlightProduct?.name?.split(' ')[0] || 'Sequoia'
 
   // Pick specific DB products so the UI matches the reference screenshot.
@@ -38,13 +26,40 @@ export default function BentoGrid() {
 
   const surfaceHeadphoneProduct =
     products.find((p) => (p.name || '').toLowerCase().includes('surface')) ||
-    products.find((p) => (p.name || '').toLowerCase().includes('headphone')) ||
-    products[2]
+    products.find((p) => (p.name || '').toLowerCase().includes('light grey'))
 
-  const releasedProduct = earbudCardProduct || newestProduct
+  const vrFeaturedProduct =
+    products.find((p) => (p.name || '').toLowerCase().includes('aura')) ||
+    products.find((p) => (p.name || '').toLowerCase().includes('vr glass')) ||
+    products.find((p) => (p.name || '').toLowerCase().includes('vr'))
+
+  // Match the reference: the dark card uses the VR image, but the visible title/copy is the Surface headphone.
+  const darkFeaturedImageProduct = vrFeaturedProduct || surfaceHeadphoneProduct
+  const darkFeaturedTitleProduct = surfaceHeadphoneProduct || vrFeaturedProduct
+  const darkFeaturedTagline = 'Boosted with bass'
+
+  const previewProducts = products
+    .filter(
+      (p) =>
+        !((p.name || '').toLowerCase().includes('vr')) &&
+        !String(p.category || '')
+          .toLowerCase()
+          .includes('vr')
+    )
+    .slice(0, 3)
+
+  const smallCardProducts = previewProducts.length ? previewProducts : products.slice(0, 3)
+
+  const productImg = (product) => getProductImage(product) || EARBUD_FALLBACK_IMAGE
+
+  const ArrowIcon = () => (
+    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 17L17 7M17 7H7M17 7v10" />
+    </svg>
+  )
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_252px] gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
 
       {/* ══════════ LEFT BLOCK ══════════ */}
       <div className="flex flex-col gap-4">
@@ -54,7 +69,7 @@ export default function BentoGrid() {
           <div
             className="rounded-[28px] overflow-hidden relative flex flex-col md:flex-row border border-stone-200/70"
             style={{
-              background: 'linear-gradient(170deg, #f3f4ef 0%, #f8f8f4 100%)',
+              background: '#f7f7f4',
               minHeight: 395
             }}
           >
@@ -69,7 +84,9 @@ export default function BentoGrid() {
               <div>
                 {/* Label tag */}
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-stone-500 mb-5 border border-stone-200 px-3 py-1.5 rounded-full bg-white/70">
-                  <span className="w-1.5 h-1.5 bg-lime-500 rounded-full animate-pulse" />
+                  <svg className="w-3 h-3 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
                   Music is Classic
                 </span>
 
@@ -86,9 +103,7 @@ export default function BentoGrid() {
                     <div>
                       <p className="text-sm font-bold text-slate-700 mb-1">Clear Sounds</p>
                       <p className="text-xs text-stone-500 font-medium leading-relaxed line-clamp-2 max-w-[270px]">
-                        Making your dream music come true
-                        <br />
-                        stay with {spotlightSoundName} Sounds!
+                        Clear Sounds. Making your dream music come true stay with {spotlightSoundName} Sounds!
                       </p>
                     </div>
                   </div>
@@ -104,16 +119,14 @@ export default function BentoGrid() {
                   >
                     View All Products
                     <span className="w-7 h-7 rounded-full bg-slate-950 text-white flex items-center justify-center">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                      </svg>
+                      <ArrowIcon />
                     </span>
                   </button>
                 </div>
 
-                {/* Social row */}
-                <div className="flex items-center gap-3 text-stone-500">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider">Follow us on:</span>
+                {/* Social + pagination */}
+                <div className="flex items-center justify-between gap-3 text-stone-500">
+                  <div className="flex items-center gap-3">
                   {[
                     'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z',
                     'M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z',
@@ -124,6 +137,16 @@ export default function BentoGrid() {
                       <path d={path}/>
                     </svg>
                   ))}
+                  </div>
+                  <div className="flex items-center gap-2 text-stone-400">
+                    <button type="button" className="w-7 h-7 rounded-full border border-stone-200 flex items-center justify-center hover:bg-white transition-colors cursor-pointer" aria-label="Previous">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <span className="text-[11px] font-bold text-stone-500">01</span>
+                    <button type="button" className="w-7 h-7 rounded-full border border-stone-200 flex items-center justify-center hover:bg-white transition-colors cursor-pointer" aria-label="Next">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -139,26 +162,31 @@ export default function BentoGrid() {
               <div className="absolute bottom-20 left-6 w-5 h-5 bg-stone-100 rounded-full border border-stone-300/70" />
               <div className="absolute bottom-10 right-24 w-3 h-3 bg-slate-300 rounded-full" />
               <div className="absolute top-1/2 right-1/2 w-2 h-2 bg-slate-300 rounded-full" />
-              {/* Product image panel */}
-              <div
-                className="relative z-10 w-[320px] md:w-[390px] h-[240px] md:h-[285px] bg-white/60 backdrop-blur-sm rounded-2xl border border-stone-200/70 shadow-sm flex items-center justify-center cursor-pointer"
+              {/* Floating product image */}
+              <img
+                src={getProductImage(spotlightProduct)}
+                className="relative z-10 w-[300px] h-[300px] md:w-[360px] md:h-[360px] object-cover cursor-pointer hover:scale-105 transition-transform duration-700"
+                style={{
+                  filter:
+                    'drop-shadow(0 0 26px rgba(59,130,246,0.22)) drop-shadow(0 18px 36px rgba(15,23,42,0.15))',
+                  transform: 'translateY(8px)'
+                }}
                 onClick={() => setActiveProductDetail(spotlightProduct)}
-              >
-                <img
-                  src={getProductImage(spotlightProduct)}
-                  className="w-[210px] h-[210px] md:w-[290px] md:h-[290px] object-contain hover:scale-105 transition-transform duration-700"
-                  style={{filter:'drop-shadow(0 0 32px rgba(59,130,246,0.24)) drop-shadow(0 14px 30px rgba(15,23,42,0.22))'}}
-                  alt={spotlightProduct.name}
-                />
-              </div>
+                alt={spotlightProduct.name}
+              />
 
-              {/* Center control icon */}
-              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white/65 backdrop-blur-sm border border-stone-200/70 flex items-center justify-center shadow-sm">
-                <svg className="w-4 h-4 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 18l-6-6 6-6" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 6l6 6-6 6" />
-                </svg>
-              </div>
+              {/* Top-right open product control (matches reference). */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setActiveProductDetail(spotlightProduct)
+                }}
+                className="absolute top-5 right-5 z-20 w-9 h-9 rounded-full bg-white/70 border border-stone-200/70 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
+                aria-label="Open product"
+              >
+                <ArrowIcon />
+              </button>
               {/* Color selector pills at bottom of image area */}
               <div className="absolute bottom-5 right-0 left-0 flex justify-center gap-2">
                 {getProductColors(spotlightProduct).map((c) => (
@@ -177,12 +205,12 @@ export default function BentoGrid() {
         )}
 
         {/* ─── BOTTOM ROW (3 cards) ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
 
           {/* More Products */}
           <div
             onClick={scrollToCatalog}
-            className="bg-[#f7f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5"
+            className="bg-[#f7f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5"
           >
             <div className="flex justify-between items-start">
               <div>
@@ -193,8 +221,8 @@ export default function BentoGrid() {
                 <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
               </svg>
             </div>
-            <div className="flex gap-2 mt-4">
-              {products.slice(0, 3).map((prod) => (
+            <div className="flex gap-2 mt-auto pt-6">
+              {smallCardProducts.map((prod) => (
                 <div key={getProductId(prod)} className="w-11 h-11 bg-stone-50 rounded-xl overflow-hidden flex items-center justify-center p-1.5 border border-stone-100 flex-shrink-0">
                   <img src={getProductImage(prod)} className="object-contain w-full h-full" alt={prod.name}/>
                 </div>
@@ -203,10 +231,10 @@ export default function BentoGrid() {
           </div>
 
           {/* Downloads / social stats card */}
-          <div className="bg-[#f7f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5">
+          <div className="bg-[#f7f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex -space-x-2">
-                {products.slice(0, 3).map((prod, i) => (
+                {smallCardProducts.map((prod, i) => (
                   <div
                     key={i}
                     className="w-7 h-7 rounded-full border-2 border-white bg-stone-100 overflow-hidden p-0.5 flex-shrink-0"
@@ -222,9 +250,9 @@ export default function BentoGrid() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-2 text-center">
+            <div className="flex flex-col items-center justify-center flex-1 py-2 gap-2">
               <div
-                className="w-[78px] h-[78px] rounded-full flex flex-col items-center justify-center shadow-lg"
+                className="w-[84px] h-[84px] rounded-full flex flex-col items-center justify-center shadow-lg"
                 style={{
                   background: 'linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%)',
                   boxShadow: '0 12px 30px rgba(79,70,229,0.35)'
@@ -233,62 +261,58 @@ export default function BentoGrid() {
                 <span className="text-white font-black text-xl leading-none">5m+</span>
                 <span className="text-indigo-100 text-[9px] font-bold uppercase tracking-wide mt-1">Downloads</span>
               </div>
+            </div>
 
-              <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-stone-50 border border-stone-100 px-3 py-1 rounded-full">
+            <div className="flex flex-col items-center gap-1.5 mt-auto">
+              <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-white border border-stone-100 px-3 py-1 rounded-full">
                 <span className="text-yellow-400">★</span> 4.6 reviews
-              </div>
-              <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-stone-50 border border-stone-100 px-3 py-1 rounded-full">
-                <span className="text-yellow-400">★</span> {catCount} categories
               </div>
             </div>
           </div>
 
-          {/* Newest / Popular card */}
-          {newestProduct ? (
+          {/* New Gen X-Bud — popular card */}
+          {earbudCardProduct ? (
             <div
-              onClick={() => setActiveProductDetail(releasedProduct)}
-            className="bg-[#f7f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 relative overflow-hidden group"
+              onClick={() => setActiveProductDetail(earbudCardProduct)}
+              className="bg-[#f7f7f2] rounded-[22px] border border-stone-200/70 shadow-sm min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 relative overflow-hidden group"
             >
-              <div className="flex justify-between items-start gap-3">
+              <div className="flex justify-between items-start gap-3 p-5 pb-0 relative z-10">
                 <span className="text-[10px] font-extrabold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full inline-flex items-center gap-1 border border-rose-100">
                   <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                   Popular
                 </span>
                 <button
-                  onClick={(e) => { e.stopPropagation(); setActiveProductDetail(releasedProduct) }}
+                  onClick={(e) => { e.stopPropagation(); setActiveProductDetail(earbudCardProduct) }}
                   className="w-6 h-6 bg-stone-100 hover:bg-slate-900 hover:text-white rounded-full flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
                   aria-label="Open product"
                 >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+                  <ArrowIcon />
                 </button>
               </div>
 
-              <div className="flex-1 mt-3 flex items-end justify-between gap-3">
-                <div className="text-left">
-                  <div className="text-xs font-extrabold text-slate-900 leading-tight">
-                    Listening
-                    <span className="block text-stone-500 font-bold">Has Been Released</span>
-                  </div>
-                </div>
-
-                <div className="w-[96px] h-[96px] rounded-[18px] bg-white/60 border border-stone-200/70 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={getProductImage(releasedProduct)}
-                    className="w-[74px] h-[74px] object-contain filter drop-shadow-sm transition-transform duration-500 group-hover:scale-110"
-                    alt={releasedProduct?.name}
-                  />
-                </div>
+              {/* crisp product stage — no fade overlay on image */}
+              <div className="absolute right-3 top-9 bottom-3 w-[52%] bg-white rounded-[18px] border border-stone-200/80 shadow-sm flex items-center justify-center overflow-hidden">
+                <img
+                  src={productImg(earbudCardProduct)}
+                  onError={(e) => { e.currentTarget.src = EARBUD_FALLBACK_IMAGE }}
+                  className="w-full h-full object-contain object-center p-2 transition-transform duration-500 group-hover:scale-105"
+                  alt={earbudCardProduct.name}
+                />
               </div>
 
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] font-bold text-stone-400 flex items-center gap-0.5">
-                  <span className="text-yellow-400">★</span> 4.7
-                </span>
-                <span className="text-[10px] font-black text-indigo-600">${releasedProduct?.price}</span>
+              <div className="absolute bottom-0 left-0 p-5 z-10 max-w-[46%]">
+                <h2 className="text-sm font-extrabold text-slate-900 leading-tight">{earbudCardProduct.name}</h2>
+                <p className="text-[11px] text-stone-500 font-semibold mt-1">Wireless earbuds · premium sound</p>
+                <div className="flex items-center justify-between mt-3 gap-2">
+                  <span className="text-[11px] font-bold text-stone-400 flex items-center gap-0.5">
+                    <span className="text-yellow-400">★</span> 4.7
+                  </span>
+                  <span className="text-sm font-black text-indigo-600">${earbudCardProduct.price}</span>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-[22px] border border-stone-100 shadow-sm" />
+            <div className="bg-white rounded-[22px] border border-stone-100 shadow-sm min-h-[210px]" />
           )}
 
         </div>
@@ -320,80 +344,60 @@ export default function BentoGrid() {
         {earbudCardProduct && (
           <div
             onClick={() => setActiveProductDetail(earbudCardProduct)}
-            className="bg-white rounded-[22px] overflow-hidden border border-stone-200/70 shadow-sm relative group hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-0.5 flex flex-col"
-            style={{minHeight:205}}
+            className="bg-white rounded-[22px] overflow-hidden border border-stone-200/70 shadow-sm relative group hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-0.5 flex flex-col min-h-[200px]"
           >
-            {/* top: meta */}
-            <div className="p-5 pb-0 flex justify-between items-start">
-              <div className="min-w-0 pr-2">
-                <h2 className="text-sm font-extrabold text-slate-900 leading-tight">{earbudCardProduct.name}</h2>
-                <p className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">
-                  {categoryIdToNameMap[earbudCardProduct.category] || earbudCardProduct.category}
-                </p>
-                <p className="text-sm font-black text-indigo-600 mt-1">${earbudCardProduct.price}</p>
-              </div>
+            <div className="p-4 flex justify-between items-start relative z-10">
+              <h2 className="text-sm font-extrabold text-slate-900 leading-tight">{earbudCardProduct.name}</h2>
               <button
                 onClick={(e) => { e.stopPropagation(); setActiveProductDetail(earbudCardProduct) }}
                 className="w-7 h-7 bg-stone-100 group-hover:bg-slate-900 group-hover:text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer flex-shrink-0"
                 aria-label="Open product"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+                <ArrowIcon />
               </button>
             </div>
-            {/* image: centered with soft stage */}
-            <div className="flex-1 relative overflow-hidden flex items-end justify-center" style={{minHeight:120}}>
-              <div
-                className="absolute inset-0"
-                style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(250,250,248,1) 100%)' }}
-              />
+
+            {/* full-width image stage */}
+            <div className="mx-3 mb-3 flex-1 min-h-[130px] rounded-[18px] bg-gradient-to-br from-stone-50 to-stone-100 border border-stone-100 overflow-hidden flex items-center justify-center">
               <img
-                src={getProductImage(earbudCardProduct)}
-                className="relative z-10 w-[140px] h-[140px] object-contain p-4 transition-transform duration-500 group-hover:scale-110"
-                style={{filter:'drop-shadow(0 10px 22px rgba(0,0,0,0.14))'}}
+                src={productImg(earbudCardProduct)}
+                onError={(e) => { e.currentTarget.src = EARBUD_FALLBACK_IMAGE }}
+                className="w-full max-h-[150px] object-contain transition-transform duration-500 group-hover:scale-105"
+                style={{filter:'drop-shadow(0 8px 18px rgba(0,0,0,0.1))'}}
                 alt={earbudCardProduct.name}
               />
             </div>
           </div>
         )}
 
-        {/* Surface headphone card (dark featured card) */}
-        {surfaceHeadphoneProduct && (
+        {/* Featured VR / surface card — full-bleed image like reference */}
+        {darkFeaturedImageProduct && darkFeaturedTitleProduct && (
           <div
-            onClick={() => setActiveProductDetail(surfaceHeadphoneProduct)}
-            className="rounded-[22px] overflow-hidden border border-stone-300/30 shadow-sm relative group hover:shadow-lg transition-all duration-300 cursor-pointer flex-1 hover:-translate-y-0.5 flex flex-col"
-            style={{
-              background: 'linear-gradient(160deg, #1a1c28 0%, #0f1018 100%)',
-              minHeight: 240
-            }}
+            onClick={() => setActiveProductDetail(darkFeaturedTitleProduct)}
+            className="rounded-[22px] overflow-hidden border border-stone-300/30 shadow-sm relative group hover:shadow-lg transition-all duration-300 cursor-pointer flex-1 hover:-translate-y-0.5 min-h-[280px]"
           >
-            {/* expand button */}
+            <img
+              src={getProductImage(darkFeaturedImageProduct)}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              alt={darkFeaturedImageProduct.name}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent" />
+
             <div className="absolute top-4 right-4 z-20">
               <button
-                onClick={(e) => { e.stopPropagation(); setActiveProductDetail(surfaceHeadphoneProduct) }}
-                className="w-7 h-7 bg-white/10 backdrop-blur-sm group-hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
+                onClick={(e) => { e.stopPropagation(); setActiveProductDetail(darkFeaturedTitleProduct) }}
+                className="w-7 h-7 bg-white/15 backdrop-blur-sm group-hover:bg-white/25 text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
+                aria-label="Open product"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+                <ArrowIcon />
               </button>
             </div>
-            {/* Product image centred with atmospheric glow */}
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden" style={{minHeight:175}}>
-              <div className="absolute inset-0" style={{background:'radial-gradient(circle at 55% 50%, rgba(99,102,241,0.18) 0%, transparent 65%)'}} />
-              <img
-                src={getProductImage(surfaceHeadphoneProduct)}
-                className="relative z-10 w-[190px] h-[190px] object-contain transition-transform duration-500 group-hover:scale-105"
-                style={{filter:'drop-shadow(0 8px 24px rgba(99,102,241,0.4)) drop-shadow(0 2px 8px rgba(0,0,0,0.5))'}}
-                alt={surfaceHeadphoneProduct.name}
-              />
-            </div>
-            {/* Caption band */}
-            <div className="p-4 pt-2 flex flex-col gap-1">
-              <h2 className="text-sm font-extrabold text-white leading-snug">{surfaceHeadphoneProduct.name}</h2>
-              <p className="text-[10px] text-indigo-200 font-semibold">Boosted with bass</p>
-              <div className="flex justify-end items-center mt-1">
-                <span className="text-[10px] font-bold text-stone-400 flex items-center gap-0.5">
-                  <span className="text-yellow-400">★</span> 4.7
-                </span>
-              </div>
+
+            <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
+              <h2 className="text-sm font-extrabold text-white leading-snug">
+                {darkFeaturedTitleProduct.name}
+              </h2>
+              <p className="text-[10px] text-stone-300 font-semibold mt-0.5">{darkFeaturedTagline}</p>
             </div>
           </div>
         )}
