@@ -5,7 +5,7 @@ const Category = require("./models/Category");
 
 dotenv.config();
 
-// Categories to be created (Furniture removed, tech-only)
+// Tech-only categories to be created (exactly 7)
 const categories = [
   { name: "Audio", description: "Audio devices, headphones, and speakers" },
   { name: "Wearables", description: "Wearable smart technology" },
@@ -16,7 +16,7 @@ const categories = [
   { name: "VR & Tech", description: "Virtual reality and next-gen tech devices" },
 ];
 
-// Product templates with price in USD and high-resolution Unsplash URLs
+// Product templates with price in USD and external image URLs
 const productTemplates = [
   {
     name: "Sequoia Inspiring Musico",
@@ -75,12 +75,12 @@ const productTemplates = [
     countInStock: 30,
   },
   {
-    name: "Portable Soundwave Speaker",
-    description: "Rugged waterproof Bluetooth speaker offering 360-degree immersive audio playback and 12 hours of battery lifespan.",
-    price: 89,
-    image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&q=80&w=600",
+    name: "Light Grey Surface Headphone",
+    description: "Light grey premium surface headphone with deep tuned bass, smooth comfort padding, and immersive clarity for everyday listening.",
+    price: 349,
+    image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&q=80&w=600",
     category: "Audio",
-    countInStock: 14,
+    countInStock: 9,
   },
   {
     name: "Streaming 4K Webcam",
@@ -131,20 +131,52 @@ const productTemplates = [
     countInStock: 6,
   },
   {
-    name: "Smart RGB Desk Lightstrip",
-    description: "Customizable dynamic neon LED ambient strip lighting compatible with home automated sync programs.",
-    price: 29,
-    image: "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?auto=format&fit=crop&q=80&w=600",
-    category: "VR & Tech",
-    countInStock: 35,
-  },
-  {
     name: "Multi Wireless Charging Stand",
     description: "Fast qi wireless charging base stand for smartphones, smartwatches, and wireless earbud cases.",
     price: 39,
     image: "https://images.unsplash.com/photo-1622445262465-2481c4574875?auto=format&fit=crop&q=80&w=600",
     category: "Power",
     countInStock: 18,
+  },
+  {
+    name: "Spatial Motion VR Controllers",
+    description: "Ergonomic motion controllers optimized for VR tracking with haptic feedback and ultra-low latency pairing.",
+    price: 179,
+    image: "https://source.unsplash.com/600x600/?vr,headset,controllers",
+    category: "VR & Tech",
+    countInStock: 9,
+  },
+  {
+    name: "Hi-Fi USB-C DAC Headphone Amp",
+    description: "Compact USB-C audio DAC/amp tuned for rich detail, low-noise output, and effortless high-impedance headphone drive.",
+    price: 129,
+    image: "https://source.unsplash.com/600x600/?audio,dac,headphones",
+    category: "Audio",
+    countInStock: 14,
+  },
+  {
+    name: "Fitness Tracker Ring",
+    description: "Discreet smart fitness ring measuring heart rate trends, recovery readiness, and sleep performance.",
+    price: 149,
+    image: "https://source.unsplash.com/600x600/?fitness,ring,wearable",
+    category: "Wearables",
+    countInStock: 11,
+  },
+  {
+    name: "NVMe SSD 2TB",
+    description: "High-throughput NVMe SSD designed for fast boot, rapid file transfers, and smooth creative workflows.",
+    price: 159,
+    image: "https://source.unsplash.com/600x600/?nvme,ssd,storage",
+    category: "Storage",
+    countInStock: 7,
+  },
+  {
+    name: "Portable 4K Monitor 15.6\"",
+    description: "Lightweight 15.6 inch portable 4K monitor for work-from-anywhere setups with crisp color and sharp text.",
+    price: 219,
+    image: "https://source.unsplash.com/600x600/?monitor,4k,portable",
+    category: "Displays",
+    countInStock: 5,
   },
 ];
 

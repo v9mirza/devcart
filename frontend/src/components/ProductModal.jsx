@@ -50,11 +50,30 @@ export default function ProductModal() {
               <span className="text-xl font-black text-indigo-600">${activeProductDetail.price}</span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold mb-4">
+            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold mb-3">
               <span className="text-yellow-500">★</span> 
               <span className="text-slate-800">{activeProductDetail.rating || 4.7}</span> 
               <span>({activeProductDetail.reviewsCount || 100} reviews)</span>
             </div>
+
+            {/* Stock status */}
+            {activeProductDetail.countInStock !== undefined && (
+              <div className="mb-4">
+                <span className={`inline-block text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
+                  activeProductDetail.countInStock === 0
+                    ? 'bg-red-50 text-red-500 border border-red-100'
+                    : activeProductDetail.countInStock <= 5
+                    ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                    : 'bg-green-50 text-green-600 border border-green-100'
+                }`}>
+                  {activeProductDetail.countInStock === 0
+                    ? '✕ Out of Stock'
+                    : activeProductDetail.countInStock <= 5
+                    ? `⚠ Only ${activeProductDetail.countInStock} left in stock`
+                    : `✓ In Stock`}
+                </span>
+              </div>
+            )}
 
             <p className="text-xs text-stone-500 leading-relaxed font-medium mb-6">
               {activeProductDetail.description}
@@ -90,9 +109,10 @@ export default function ProductModal() {
                 selectedColor, 
                 1
               )}
-              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-full text-center shadow-md cursor-pointer transition-transform duration-200 hover:scale-[1.02] active:scale-98"
+              disabled={activeProductDetail.countInStock === 0}
+              className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-full text-center shadow-md cursor-pointer transition-transform duration-200 hover:scale-[1.02] active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              Add to Cart
+              {activeProductDetail.countInStock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
             
             <button

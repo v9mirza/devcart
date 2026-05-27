@@ -6,6 +6,7 @@ export default function WishlistDrawer() {
     isWishlistOpen,
     setIsWishlistOpen,
     toggleWishlist,
+    clearWishlist,
     addToCart,
     getProductImage,
     colorsMap
@@ -36,12 +37,22 @@ export default function WishlistDrawer() {
                 {wishlist.length}
               </span>
             </div>
-            <button
-              onClick={() => setIsWishlistOpen(false)}
-              className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center transition-colors cursor-pointer"
-            >
-              ×
-            </button>
+            <div className="flex items-center gap-2">
+              {wishlist.length > 0 && (
+                <button
+                  onClick={clearWishlist}
+                  className="text-xs font-bold text-stone-400 hover:text-red-500 bg-stone-100 hover:bg-red-50 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                onClick={() => setIsWishlistOpen(false)}
+                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                ×
+              </button>
+            </div>
           </div>
 
           {/* Items List */}

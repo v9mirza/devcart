@@ -87,9 +87,21 @@ export default function CatalogSection() {
                     </h3>
                     <span className="font-black text-md text-indigo-600">${prod.price}</span>
                   </div>
-                  <p className="text-xs text-stone-400 font-medium line-clamp-2 mb-4 leading-relaxed">
+                  <p className="text-xs text-stone-400 font-medium line-clamp-2 mb-3 leading-relaxed">
                     {prod.description}
                   </p>
+                  {/* Stock badge */}
+                  {prod.countInStock !== undefined && (
+                    <span className={`inline-block text-[10px] font-extrabold px-2.5 py-1 rounded-full mb-3 ${
+                      prod.countInStock === 0
+                        ? 'bg-red-50 text-red-500 border border-red-100'
+                        : prod.countInStock <= 5
+                        ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                        : 'bg-green-50 text-green-600 border border-green-100'
+                    }`}>
+                      {prod.countInStock === 0 ? '✕ Out of Stock' : prod.countInStock <= 5 ? `⚠ Low Stock (${prod.countInStock} left)` : `✓ In Stock`}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between border-t border-stone-100 pt-3">
@@ -98,9 +110,10 @@ export default function CatalogSection() {
                   </span>
                   <button
                     onClick={() => setActiveProductDetail(prod)}
-                    className="bg-stone-900 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-slate-800 transition-colors cursor-pointer"
+                    disabled={prod.countInStock === 0}
+                    className="bg-stone-900 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Details
+                    {prod.countInStock === 0 ? 'Unavailable' : 'Details'}
                   </button>
                 </div>
               </div>

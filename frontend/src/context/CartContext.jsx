@@ -107,7 +107,6 @@ export function CartProvider({ children }) {
   const [likes, setLikes] = useState(460)
   const [hasLiked, setHasLiked] = useState(false)
   const [showCheckoutSuccess, setShowCheckoutSuccess] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(4 * 3600 + 12 * 60 + 9) // 4h 12m 9s
   const catalogRef = useRef(null)
 
   const scrollToCatalog = () => {
@@ -151,13 +150,6 @@ export function CartProvider({ children }) {
     fetchData()
   }, [])
 
-  // Timer countdown
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0))
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
 
   // Map category _id to name
   const categoryIdToNameMap = useMemo(() => {
@@ -237,6 +229,33 @@ export function CartProvider({ children }) {
     return product.colors || ['blue', 'orange', 'green', 'red', 'teal']
   }
 
+  // Refresh user data from server (keeps localStorage in sync with DB)
+  const refreshUser = async () => {
+    const token = localStorage.getItem('devcart_token')
+    if (!token) return
+    try {
+      const res = await fetch('http://localhost:5000/api/users/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const freshUser = await res.json()
+        const userData = {
+          id: freshUser._id || freshUser.id,
+          name: freshUser.name,
+          email: freshUser.email,
+          isAdmin: freshUser.isAdmin,
+          shippingAddress: freshUser.shippingAddress || { address: '', city: '', postalCode: '', country: '' }
+        }
+        localStorage.setItem('devcart_user', JSON.stringify(userData))
+        setUser(userData)
+      } else if (res.status === 401) {
+        logout()
+      }
+    } catch (err) {
+      console.warn('Failed to refresh user, using cached data.', err)
+    }
+  }
+
   // Helper to fetch cart from backend
   const fetchDbCart = async () => {
     const token = localStorage.getItem('devcart_token')
@@ -261,7 +280,7 @@ export function CartProvider({ children }) {
             }
             return {
               product: fullProduct,
-              color: 'black', // Default/fallback color
+              color: 'black',
               quantity: item.qty,
               customPrice: null
             }
@@ -337,12 +356,18 @@ export function CartProvider({ children }) {
     return wishlist.some((item) => getProductId(item) === productId)
   }
 
+  // On mount: silently refresh user data from server if token exists
+  useEffect(() => {
+    const token = localStorage.getItem('devcart_token')
+    if (token) refreshUser()
+  }, [])
+
   // Fetch db cart and wishlist on login or when products list finishes loading
   useEffect(() => {
     if (products.length > 0 && user) {
       fetchDbCart()
       fetchWishlist()
-    } else {
+    } else if (!user) {
       setWishlist([])
     }
   }, [products, user])
@@ -457,6 +482,23 @@ export function CartProvider({ children }) {
     localStorage.setItem('devcart_token', token)
     localStorage.setItem('devcart_user', JSON.stringify(userData))
     setUser(userData)
+
+    // Sync any locally-added cart items to the backend DB so checkout works
+    setCart((currentCart) => {
+      if (currentCart.length > 0) {
+        currentCart.forEach((item) => {
+          fetch('http://localhost:5000/api/cart', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ productId: getProductId(item.product), qty: item.quantity })
+          }).catch((err) => console.warn('Cart sync on login failed for item:', err))
+        })
+      }
+      return currentCart
+    })
   }
 
   const logout = () => {
@@ -465,6 +507,21 @@ export function CartProvider({ children }) {
     setUser(null)
     setCart([])
     setWishlist([])
+  }
+
+  const clearWishlist = async () => {
+    const token = localStorage.getItem('devcart_token')
+    if (!token || !user) return
+    try {
+      const res = await fetch('http://localhost:5000/api/wishlist', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (res.ok) setWishlist([])
+      else if (res.status === 401) logout()
+    } catch (err) {
+      console.error('Failed to clear wishlist', err)
+    }
   }
 
   const updateProfile = async (profileData) => {
@@ -510,7 +567,9 @@ export function CartProvider({ children }) {
         isWishlistOpen,
         setIsWishlistOpen,
         toggleWishlist,
+        clearWishlist,
         isProductInWishlist,
+        refreshUser,
         isCartOpen,
         setIsCartOpen,
         searchQuery,
@@ -525,7 +584,6 @@ export function CartProvider({ children }) {
         hasLiked,
         showCheckoutSuccess,
         setShowCheckoutSuccess,
-        timeLeft,
         categoryIdToNameMap,
         categories,
         filteredProducts,
