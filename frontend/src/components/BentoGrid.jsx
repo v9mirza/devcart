@@ -1,9 +1,27 @@
+import { useMemo } from 'react'
 import { useCart, getProductId } from '../context/CartContext'
 import ProductImage from './ProductImage'
-import blueHeadphones from '../assets/blue_headphones.png'
 
-const EARBUD_FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1636093973985-4fe333d36de9?auto=format&fit=crop&q=80&w=900'
+function pickDistinctPreviewProducts(productList, getProductImage, limit = 3) {
+  const picked = []
+  const seen = new Set()
+
+  for (const product of productList) {
+    const imageKey = String(getProductImage(product))
+    if (seen.has(imageKey)) continue
+    seen.add(imageKey)
+    picked.push(product)
+    if (picked.length >= limit) return picked
+  }
+
+  for (const product of productList) {
+    if (picked.includes(product)) continue
+    picked.push(product)
+    if (picked.length >= limit) return picked
+  }
+
+  return picked
+}
 
 export default function BentoGrid() {
   const {
@@ -39,19 +57,32 @@ export default function BentoGrid() {
   const darkFeaturedTitleProduct = surfaceHeadphoneProduct || vrFeaturedProduct
   const darkFeaturedTagline = 'Boosted with bass'
 
-  const previewProducts = products
-    .filter(
+  const editorsPick = useMemo(() => {
+    const skip = new Set(
+      [spotlightProduct, earbudCardProduct]
+        .filter(Boolean)
+        .map((p) => getProductId(p))
+    )
+    const candidate =
+      surfaceHeadphoneProduct ||
+      vrFeaturedProduct ||
+      products.find((p) => {
+        const id = getProductId(p)
+        return id && !skip.has(id)
+      })
+    if (!candidate) return null
+    return skip.has(getProductId(candidate)) ? null : candidate
+  }, [products, spotlightProduct, earbudCardProduct, surfaceHeadphoneProduct, vrFeaturedProduct])
+
+  const smallCardProducts = useMemo(() => {
+    const pool = products.filter(
       (p) =>
         !((p.name || '').toLowerCase().includes('vr')) &&
-        !String(p.category || '')
-          .toLowerCase()
-          .includes('vr')
+        !String(p.category || '').toLowerCase().includes('vr')
     )
-    .slice(0, 3)
-
-  const smallCardProducts = previewProducts.length ? previewProducts : products.slice(0, 3)
-
-  const productImg = (product) => getProductImage(product) || EARBUD_FALLBACK_IMAGE
+    const list = pool.length ? pool : products
+    return pickDistinctPreviewProducts(list, getProductImage, 3)
+  }, [products, getProductImage])
 
   const ProductThumb = ({ product, className, ...props }) => (
     <ProductImage
@@ -61,6 +92,34 @@ export default function BentoGrid() {
       alt={product?.name}
       {...props}
     />
+  )
+
+  const bentoProductCardShell =
+    'flex flex-col bg-inset rounded-[22px] overflow-hidden border border-zinc-200/70 shadow-sm relative group hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-0.5 min-h-[200px]'
+
+  const BentoProductCard = ({ title, onClick, onArrowClick, children, badge }) => (
+    <div onClick={onClick} className={bentoProductCardShell}>
+      <div className="p-4 flex justify-between items-start gap-2 relative z-10">
+        <div className="min-w-0 flex-1">
+          {badge}
+          <h2 className="text-sm font-extrabold text-slate-900 leading-tight truncate">{title}</h2>
+        </div>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onArrowClick?.()
+          }}
+          className="w-7 h-7 bg-stone-100 group-hover:bg-slate-900 group-hover:text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0"
+          aria-label="Open"
+        >
+          <ArrowIcon />
+        </button>
+      </div>
+      <div className="mx-3 mb-3 flex-1 min-h-[130px] rounded-[18px] bg-gradient-to-br from-stone-50 to-stone-100 border border-stone-100 overflow-hidden flex items-center justify-center">
+        {children}
+      </div>
+    </div>
   )
 
   const ArrowIcon = () => (
@@ -203,114 +262,68 @@ export default function BentoGrid() {
         )}
 
         {/* ─── BOTTOM ROW (3 cards) ─── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-
-          {/* More Products */}
-          <div
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
+          <BentoProductCard
+            title="More products"
             onClick={scrollToCatalog}
-            className="bg-inset rounded-[22px] p-4 sm:p-5 border border-zinc-200/80 shadow-sm flex flex-col gap-4 min-h-[140px] sm:min-h-[180px] cursor-pointer hover:shadow-md transition-all duration-300 md:hover:scale-[1.01] md:hover:-translate-y-0.5"
+            onArrowClick={scrollToCatalog}
           >
-            <div className="flex justify-between items-start gap-3">
-              <div>
-                <h2 className="text-sm font-extrabold text-slate-800">More Products</h2>
-                <p className="text-xs text-stone-400 font-medium mt-0.5">{products.length} plus items</p>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500 flex-shrink-0">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                </svg>
-              </div>
-            </div>
-            <div className="flex gap-2.5 flex-wrap">
+            <div className="flex items-center justify-center gap-2 w-full h-full p-3">
               {smallCardProducts.map((prod) => (
-                <div key={getProductId(prod)} className="w-12 h-12 sm:w-14 sm:h-14 bg-surface rounded-xl overflow-hidden flex items-center justify-center p-1.5 border border-zinc-200/80 flex-shrink-0">
+                <div
+                  key={getProductId(prod)}
+                  className="flex-1 max-w-[4.5rem] aspect-square rounded-xl bg-surface/80 border border-stone-200/60 flex items-center justify-center p-1.5"
+                >
                   <ProductThumb product={prod} className="object-contain w-full h-full" />
                 </div>
               ))}
             </div>
-          </div>
+          </BentoProductCard>
 
-          {/* Downloads / social stats card */}
-          <div className="bg-inset rounded-[22px] p-4 sm:p-5 border border-zinc-200/80 shadow-sm flex flex-col items-center gap-3 min-h-[140px] sm:min-h-[180px] cursor-pointer hover:shadow-md transition-all duration-300 md:hover:scale-[1.01] md:hover:-translate-y-0.5">
-            <div className="w-full flex items-center justify-between gap-3">
-              <div className="flex -space-x-2">
-                {smallCardProducts.map((prod, i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-surface bg-inset overflow-hidden p-0.5 flex-shrink-0"
-                  >
-                    <ProductThumb product={prod} className="object-contain w-full h-full" />
-                  </div>
-                ))}
-              </div>
-              <div className="w-8 h-8 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center justify-center gap-2">
-              <div
-                className="w-[72px] h-[72px] sm:w-[84px] sm:h-[84px] rounded-full flex flex-col items-center justify-center shadow-lg"
-                style={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #6d28d9 100%)',
-                  boxShadow: '0 12px 30px rgba(79,70,229,0.35)'
-                }}
-              >
-                <span className="text-white font-black text-xl leading-none">5m+</span>
-                <span className="text-indigo-100 text-[9px] font-bold uppercase tracking-wide mt-1">Downloads</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-surface border border-zinc-200 px-3 py-1 rounded-full">
-              <span className="text-yellow-400">★</span> 4.6 reviews
-            </div>
-          </div>
-
-          {/* New Gen X-Bud — popular card */}
-          {earbudCardProduct ? (
-            <div
-              onClick={() => setActiveProductDetail(earbudCardProduct)}
-              className="bg-inset rounded-[22px] border border-stone-300/70 shadow-sm min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 relative overflow-hidden group"
-            >
-              <div className="flex justify-between items-start gap-3 p-5 pb-0 relative z-10">
-                <span className="text-[10px] font-extrabold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full inline-flex items-center gap-1 border border-rose-100">
-                  <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                  Popular
+          {editorsPick ? (
+            <BentoProductCard
+              title={editorsPick.name}
+              badge={
+                <span className="text-[10px] font-extrabold uppercase tracking-wide text-accent block mb-0.5">
+                  Editor&apos;s choice
                 </span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setActiveProductDetail(earbudCardProduct) }}
-                  className="w-6 h-6 bg-stone-100 hover:bg-slate-900 hover:text-white rounded-full flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
-                  aria-label="Open product"
-                >
-                  <ArrowIcon />
-                </button>
-              </div>
-
-              {/* crisp product stage — no fade overlay on image */}
-              <div className="absolute right-3 top-9 bottom-3 w-[52%] bg-white rounded-[18px] border border-stone-200/80 shadow-sm flex items-center justify-center overflow-hidden">
-                <ProductThumb
-                  product={earbudCardProduct}
-                  className="w-full h-full object-contain object-center p-2 transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
-
-              <div className="absolute bottom-0 left-0 p-5 z-10 max-w-[46%]">
-                <h2 className="text-sm font-extrabold text-slate-900 leading-tight">{earbudCardProduct.name}</h2>
-                <p className="text-[11px] text-stone-500 font-semibold mt-1">Wireless earbuds · premium sound</p>
-                <div className="flex items-center justify-between mt-3 gap-2">
-                  <span className="text-[11px] font-bold text-stone-400 flex items-center gap-0.5">
-                    <span className="text-yellow-400">★</span> 4.7
-                  </span>
-                  <span className="text-sm font-black text-slate-900">${earbudCardProduct.price}</span>
-                </div>
-              </div>
-            </div>
+              }
+              onClick={() => setActiveProductDetail(editorsPick)}
+              onArrowClick={() => setActiveProductDetail(editorsPick)}
+            >
+              <ProductThumb
+                product={editorsPick}
+                className="w-full max-h-[150px] object-contain transition-transform duration-500 group-hover:scale-105"
+                style={{ filter: 'drop-shadow(0 8px 18px rgba(0,0,0,0.1))' }}
+              />
+            </BentoProductCard>
           ) : (
-            <div className="bg-white rounded-[22px] border border-stone-100 shadow-sm min-h-[210px]" />
+            <div className={`${bentoProductCardShell} animate-pulse`} />
           )}
 
+          {earbudCardProduct ? (
+            <BentoProductCard
+              title={earbudCardProduct.name}
+              badge={
+                <span className="text-[10px] font-extrabold text-rose-500 inline-flex items-center gap-0.5 mb-0.5">
+                  <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  Popular
+                </span>
+              }
+              onClick={() => setActiveProductDetail(earbudCardProduct)}
+              onArrowClick={() => setActiveProductDetail(earbudCardProduct)}
+            >
+              <ProductThumb
+                product={earbudCardProduct}
+                className="w-full max-h-[150px] object-contain transition-transform duration-500 group-hover:scale-105"
+                style={{ filter: 'drop-shadow(0 8px 18px rgba(0,0,0,0.1))' }}
+              />
+            </BentoProductCard>
+          ) : (
+            <div className={`${bentoProductCardShell} animate-pulse`} />
+          )}
         </div>
       </div>
 
@@ -335,29 +348,18 @@ export default function BentoGrid() {
 
         {/* Earbuds card (New Gen X-Bud) */}
         {earbudCardProduct && (
-          <div
-            onClick={() => setActiveProductDetail(earbudCardProduct)}
-            className="hidden lg:flex lg:flex-col bg-inset rounded-[22px] overflow-hidden border border-zinc-200/70 shadow-sm relative group hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-0.5 min-h-[200px]"
-          >
-            <div className="p-4 flex justify-between items-start relative z-10">
-              <h2 className="text-sm font-extrabold text-slate-900 leading-tight">{earbudCardProduct.name}</h2>
-              <button
-                onClick={(e) => { e.stopPropagation(); setActiveProductDetail(earbudCardProduct) }}
-                className="w-7 h-7 bg-stone-100 group-hover:bg-slate-900 group-hover:text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer flex-shrink-0"
-                aria-label="Open product"
-              >
-                <ArrowIcon />
-              </button>
-            </div>
-
-            {/* full-width image stage */}
-            <div className="mx-3 mb-3 flex-1 min-h-[130px] rounded-[18px] bg-gradient-to-br from-stone-50 to-stone-100 border border-stone-100 overflow-hidden flex items-center justify-center">
+          <div className="hidden lg:block">
+            <BentoProductCard
+              title={earbudCardProduct.name}
+              onClick={() => setActiveProductDetail(earbudCardProduct)}
+              onArrowClick={() => setActiveProductDetail(earbudCardProduct)}
+            >
               <ProductThumb
                 product={earbudCardProduct}
                 className="w-full max-h-[150px] object-contain transition-transform duration-500 group-hover:scale-105"
                 style={{ filter: 'drop-shadow(0 8px 18px rgba(0,0,0,0.1))' }}
               />
-            </div>
+            </BentoProductCard>
           </div>
         )}
 
