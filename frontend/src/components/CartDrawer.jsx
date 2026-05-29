@@ -16,9 +16,15 @@ export default function CartDrawer() {
     shippingCost,
     cartTotal,
     getProductImage,
+    handleCheckout,
     isBackendOnline,
     cartSyncError
   } = useCart()
+
+  const handleDemoCheckout = () => {
+    handleCheckout()
+    setIsCartOpen(false)
+  }
 
   if (!isCartOpen) return null
 
@@ -153,6 +159,15 @@ export default function CartDrawer() {
                     className="w-full bg-stone-300 text-stone-600 font-bold py-3 rounded-full text-center cursor-not-allowed"
                   >
                     Checkout Unavailable (Server Offline)
+                  </button>
+                )}
+                {import.meta.env.DEV && (
+                  <button
+                    type="button"
+                    onClick={handleDemoCheckout}
+                    className="w-full border border-dashed border-amber-300 bg-amber-50/80 hover:bg-amber-50 text-amber-900 font-bold py-2 rounded-full text-center text-xs transition-colors cursor-pointer"
+                  >
+                    Demo checkout (no order)
                   </button>
                 )}
                 <button
