@@ -52,6 +52,10 @@ export default function BentoGrid() {
     products.find((p) => (p.name || '').toLowerCase().includes('vr glass')) ||
     products.find((p) => (p.name || '').toLowerCase().includes('vr'))
 
+  const editorsPickProduct = products.find((p) =>
+    (p.name || '').toLowerCase().includes('ergonomic vertical mouse')
+  )
+
   // Match the reference: the dark card uses the VR image, but the visible title/copy is the Surface headphone.
   const darkFeaturedImageProduct = vrFeaturedProduct || surfaceHeadphoneProduct
   const darkFeaturedTitleProduct = surfaceHeadphoneProduct || vrFeaturedProduct
@@ -64,6 +68,7 @@ export default function BentoGrid() {
         .map((p) => getProductId(p))
     )
     const candidate =
+      editorsPickProduct ||
       surfaceHeadphoneProduct ||
       vrFeaturedProduct ||
       products.find((p) => {
@@ -72,7 +77,14 @@ export default function BentoGrid() {
       })
     if (!candidate) return null
     return skip.has(getProductId(candidate)) ? null : candidate
-  }, [products, spotlightProduct, earbudCardProduct, surfaceHeadphoneProduct, vrFeaturedProduct])
+  }, [
+    products,
+    spotlightProduct,
+    earbudCardProduct,
+    editorsPickProduct,
+    surfaceHeadphoneProduct,
+    vrFeaturedProduct
+  ])
 
   const smallCardProducts = useMemo(() => {
     const pool = products.filter(
