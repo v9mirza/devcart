@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useCart, getProductId } from '../context/CartContext'
+import DrawerShell from './DrawerShell'
 import ProductImage from './ProductImage'
 
 export default function CartDrawer() {
@@ -18,36 +19,24 @@ export default function CartDrawer() {
     getProductImage,
     handleCheckout,
     isBackendOnline,
-    cartSyncError
+    cartSyncError,
+    user
   } = useCart()
 
   const handleDemoCheckout = () => {
-    handleCheckout()
+    handleCheckout(null, { demo: true })
     setIsCartOpen(false)
   }
 
-  if (!isCartOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Overlay backdrop */}
-      <div 
-        onClick={() => setIsCartOpen(false)}
-        className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300"
-      />
-
-      {/* Slide panel */}
-      <div className="absolute inset-y-0 right-0 w-full flex justify-end">
-        <div className="w-full sm:max-w-md bg-surface border-l border-zinc-200 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.34)] flex flex-col justify-between h-full">
-          
-          {/* Header */}
-          <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between">
+    <DrawerShell open={isCartOpen} onClose={() => setIsCartOpen(false)}>
+      <header className="shrink-0 px-6 py-5 border-b border-stone-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
               <h2 className="text-lg font-black text-slate-900">Your Cart</h2>
-              <span className="text-xs bg-slate-100 text-slate-800 font-bold px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-accent-muted text-accent font-bold px-2 py-0.5 rounded-full">
                 {cartTotalItems}
               </span>
             </div>
@@ -57,10 +46,9 @@ export default function CartDrawer() {
             >
               ×
             </button>
-          </div>
+      </header>
 
-          {/* Items List */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 divide-y divide-stone-100">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-4 divide-y divide-stone-100">
             {cart.length > 0 ? (
               cart.map((item, idx) => (
                 <div key={`${getProductId(item.product)}-${idx}`} className="py-4.5 flex gap-4 items-center">
@@ -111,17 +99,29 @@ export default function CartDrawer() {
                 </div>
               ))
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="flex flex-col items-center justify-center py-20 text-center animate-empty-in px-4">
                 <span className="text-4xl mb-4">🛒</span>
                 <h4 className="text-sm font-bold text-slate-800">Your cart is empty</h4>
-                <p className="text-xs text-stone-400 mt-1.5 max-w-[200px]">Fill it with high-end tech products from our dashboard.</p>
+                <p className="text-xs text-stone-400 mt-1.5 max-w-[220px]">
+                  {user
+                    ? 'Browse the catalog and add items to get started.'
+                    : 'Sign in to save items in your cart and check out.'}
+                </p>
+                {!user && (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsCartOpen(false)}
+                    className="mt-4 text-xs font-bold text-accent hover:text-accent-hover"
+                  >
+                    Sign in
+                  </Link>
+                )}
               </div>
             )}
-          </div>
+      </div>
 
-          {/* Drawer footer summary */}
-          {cart.length > 0 && (
-            <div className="px-6 py-6 bg-inset border-t border-zinc-200 flex flex-col gap-3">
+      {cart.length > 0 && (
+        <footer className="shrink-0 px-6 py-6 bg-inset border-t border-zinc-200 flex flex-col gap-3 safe-area-pb">
               <div className="flex flex-col gap-2 text-sm font-bold text-stone-500">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
@@ -148,7 +148,7 @@ export default function CartDrawer() {
                   <Link
                     to="/checkout"
                     onClick={() => setIsCartOpen(false)}
-                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3 rounded-full text-center shadow-lg transition-transform duration-200 hover:scale-[1.01] active:scale-99"
+                    className="w-full btn-primary py-3 shadow-lg"
                   >
                     Proceed to Checkout
                   </Link>
@@ -187,11 +187,9 @@ export default function CartDrawer() {
                   </p>
                 )}
               </div>
-            </div>
-          )}
+        </footer>
+      )}
 
-        </div>
-      </div>
-    </div>
+    </DrawerShell>
   )
 }

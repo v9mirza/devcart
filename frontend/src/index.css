@@ -7,6 +7,10 @@
   --color-surface-hover: #fafafa;
   --color-inset: #fafafa;
   --color-border: #e4e4e7;
+  --color-accent: #0d9488;
+  --color-accent-hover: #0f766e;
+  --color-accent-muted: #ccfbf1;
+  --color-accent-foreground: #ffffff;
 }
 
 :root {
@@ -52,7 +56,7 @@ body {
 
   .form-input {
     @apply bg-inset border border-zinc-200 px-4 py-3 rounded-xl text-sm font-medium w-full
-      focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-zinc-300
+      focus:outline-none focus:ring-2 focus:ring-teal-200 focus:border-teal-300
       placeholder:text-stone-400;
   }
 
@@ -65,16 +69,177 @@ body {
   }
 
   .btn-primary {
-    @apply w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-center
-      shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+    @apply w-full bg-accent hover:bg-accent-hover text-accent-foreground font-bold py-3.5 rounded-full text-center
+      shadow-lg shadow-teal-900/10 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
   }
 
   .btn-secondary {
-    @apply bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold px-6 py-2.5 rounded-full
-      shadow-sm transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer;
+    @apply bg-accent hover:bg-accent-hover text-accent-foreground text-xs font-bold px-6 py-2.5 rounded-full
+      shadow-sm shadow-teal-900/10 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer;
+  }
+
+  .pill-active {
+    @apply bg-accent text-accent-foreground shadow-sm shadow-teal-900/10;
+  }
+
+  .animate-drawer-backdrop {
+    animation: drawer-backdrop-in 0.28s ease-out forwards;
+  }
+
+  .animate-drawer-panel {
+    animation: drawer-panel-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animate-cart-badge-pulse {
+    animation: cart-badge-pulse 0.55s ease-out;
+  }
+
+  .animate-toast-in {
+    animation: toast-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animate-modal-in {
+    animation: modal-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animate-modal-sheet-in {
+    animation: modal-sheet-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animate-page-in {
+    animation: page-in 0.32s ease-out forwards;
+  }
+
+  .animate-catalog-card-in {
+    animation: catalog-card-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  .animate-empty-in {
+    animation: empty-in 0.4s ease-out forwards;
+  }
+
+  .animate-cart-icon-bounce {
+    animation: cart-icon-bounce 0.5s ease-out;
+  }
+
+  .animate-fly-to-cart {
+    animation: fly-to-cart 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   .section-muted {
     @apply bg-inset p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-zinc-200/80;
+  }
+}
+
+@keyframes drawer-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes drawer-panel-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes cart-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.22); }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modal-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes catalog-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes empty-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes cart-icon-bounce {
+  0%, 100% { transform: scale(1); }
+  35% { transform: scale(1.12); }
+  55% { transform: scale(0.96); }
+}
+
+@keyframes fly-to-cart {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--fly-dx, 120px)), calc(-50% + var(--fly-dy, -80px)))
+      scale(0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-drawer-backdrop,
+  .animate-drawer-panel,
+  .animate-cart-badge-pulse,
+  .animate-toast-in,
+  .animate-modal-in,
+  .animate-modal-sheet-in,
+  .animate-page-in,
+  .animate-catalog-card-in,
+  .animate-empty-in,
+  .animate-cart-icon-bounce,
+  .animate-fly-to-cart {
+    animation: none;
   }
 }

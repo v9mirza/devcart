@@ -178,7 +178,7 @@ export default function BentoGrid() {
                 <button
                   type="button"
                   onClick={() => setActiveProductDetail(spotlightProduct)}
-                  className="col-span-2 sm:col-span-1 sm:flex-none justify-center bg-slate-950 hover:bg-slate-800 text-white text-sm font-bold px-4 py-2.5 sm:px-6 sm:py-3 rounded-full inline-flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-md"
+                  className="col-span-2 sm:col-span-1 sm:flex-none justify-center btn-secondary text-sm px-4 py-2.5 sm:px-6 sm:py-3 inline-flex items-center justify-center gap-2"
                 >
                   View Product
                   <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">

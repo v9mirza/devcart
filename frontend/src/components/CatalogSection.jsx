@@ -16,8 +16,11 @@ export default function CatalogSection() {
     setActiveProductDetail,
     catalogRef,
     toggleWishlist,
-    isProductInWishlist
+    isProductInWishlist,
+    searchQuery
   } = useCart()
+
+  const catalogGridKey = `${selectedCategory}-${sortBy}-${searchQuery}`
 
   const displayedProducts = useMemo(() => {
     const list = [...filteredProducts]
@@ -78,8 +81,8 @@ export default function CatalogSection() {
               disabled={loading}
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-inset text-stone-600 border border-zinc-200 hover:bg-surface-hover'
+                  ? 'pill-active'
+                  : 'bg-inset text-stone-600 border border-zinc-200 hover:bg-surface-hover hover:border-teal-200/80'
               } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
               {cat}
@@ -114,7 +117,7 @@ export default function CatalogSection() {
 
       {/* Dynamic Grid */}
       {error && !loading ? (
-        <div className="text-center py-10 bg-inset rounded-[22px] border border-stone-300/40">
+        <div className="text-center py-10 bg-inset rounded-[22px] border border-stone-300/40 animate-empty-in">
           <h3 className="text-md font-bold text-slate-800">We couldn’t load the latest products.</h3>
           <p className="text-xs text-stone-400 mt-1">You can still browse what’s available right now.</p>
         </div>
@@ -125,11 +128,15 @@ export default function CatalogSection() {
           ))}
         </div>
       ) : displayedProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {displayedProducts.map((prod) => (
-            <div 
-              key={getProductId(prod)} 
-              className="bg-inset rounded-[22px] p-4 sm:p-5 border border-zinc-200/80 shadow-sm flex flex-col justify-between group transition-all duration-300 hover:shadow-md md:hover:scale-[1.01]"
+        <div
+          key={catalogGridKey}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+        >
+          {displayedProducts.map((prod, idx) => (
+            <div
+              key={getProductId(prod)}
+              className="bg-inset rounded-[22px] p-4 sm:p-5 border border-zinc-200/80 shadow-sm flex flex-col justify-between group transition-all duration-300 hover:shadow-md md:hover:scale-[1.01] animate-catalog-card-in"
+              style={{ animationDelay: `${Math.min(idx, 11) * 45}ms` }}
             >
               <div className="h-40 sm:h-44 w-full bg-surface rounded-[18px] border border-zinc-200/60 flex items-center justify-center p-4 relative overflow-hidden mb-4">
                 <ProductImage
@@ -193,7 +200,7 @@ export default function CatalogSection() {
                   <button
                     onClick={() => setActiveProductDetail(prod)}
                     disabled={prod.countInStock === 0}
-                    className="bg-stone-900 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="bg-accent hover:bg-accent-hover text-accent-foreground text-xs font-bold px-4 py-2 rounded-full transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {prod.countInStock === 0 ? 'Unavailable' : 'Details'}
                   </button>
@@ -203,7 +210,7 @@ export default function CatalogSection() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 bg-inset rounded-[22px] border border-stone-300/40">
+        <div className="text-center py-16 bg-inset rounded-[22px] border border-stone-300/40 animate-empty-in">
           <div className="w-14 h-14 rounded-full bg-stone-50 border border-stone-100 flex items-center justify-center mx-auto">
             <svg className="w-6 h-6 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

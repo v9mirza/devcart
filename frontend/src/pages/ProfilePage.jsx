@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
+import UserAvatar from '../components/UserAvatar'
 
 export default function ProfilePage() {
   const { user, logout, updateProfile, refreshUser } = useCart()
@@ -177,11 +178,7 @@ export default function ProfilePage() {
 
       {/* Profile Details Block */}
       <div className="section-muted flex flex-col sm:flex-row gap-6 items-center">
-        <img
-          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"
-          className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
-          alt="Avatar"
-        />
+        <UserAvatar user={user} className="w-20 h-20 ring-4 ring-white shadow-md" textClassName="text-xl" />
         <div className="text-center sm:text-left flex-1">
           <h3 className="text-xl font-black text-slate-900">{user.name}</h3>
           <p className="text-xs text-stone-400 font-bold mt-0.5">{user.email}</p>

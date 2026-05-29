@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
+import UserAvatar from './UserAvatar'
 
 function SearchField({ compact = false, searchQuery, setSearchQuery }) {
   return (
@@ -39,7 +40,7 @@ function SearchField({ compact = false, searchQuery, setSearchQuery }) {
       )}
       <button
         type="button"
-        className={`absolute right-1 top-1/2 -translate-y-1/2 bg-slate-950 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-slate-800 transition-colors ${
+        className={`absolute right-1 top-1/2 -translate-y-1/2 bg-accent text-accent-foreground rounded-full flex items-center justify-center cursor-pointer hover:bg-accent-hover transition-colors ${
           compact ? 'w-8 h-8' : 'w-9 h-9'
         }`}
         aria-label="Search"
@@ -58,6 +59,7 @@ export default function Header({ compact = false }) {
     setSearchQuery,
     setIsCartOpen,
     cartTotalItems,
+    cartBadgePulse,
     wishlist,
     setIsWishlistOpen,
     user
@@ -69,8 +71,12 @@ export default function Header({ compact = false }) {
   const iconButtons = (
     <div className={`flex items-center shrink-0 ${compact ? 'gap-1' : 'gap-2'}`}>
       <button
+        type="button"
+        data-cart-target
         onClick={() => setIsCartOpen(true)}
-        className={`${iconSize} bg-inset border border-zinc-200 rounded-full flex items-center justify-center text-slate-800 hover:bg-surface-hover active:scale-95 transition-all shadow-sm relative cursor-pointer`}
+        className={`${iconSize} bg-inset border border-zinc-200 rounded-full flex items-center justify-center text-slate-800 hover:bg-surface-hover active:scale-95 transition-all shadow-sm relative cursor-pointer ${
+          cartBadgePulse ? 'animate-cart-icon-bounce' : ''
+        }`}
         aria-label="Open cart"
       >
         <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +84,9 @@ export default function Header({ compact = false }) {
         </svg>
         {cartTotalItems > 0 && (
           <span
-            className={`absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-black min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center ${badgeRing}`}
+            className={`absolute -top-0.5 -right-0.5 bg-accent text-accent-foreground text-[9px] font-black min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center ${badgeRing} ${
+              cartBadgePulse ? 'animate-cart-badge-pulse' : ''
+            }`}
           >
             {cartTotalItems}
           </span>
@@ -106,24 +114,35 @@ export default function Header({ compact = false }) {
         )}
       </button>
 
-      <Link
-        to={user ? '/profile' : '/login'}
-        className={`${iconSize} flex items-center justify-center bg-inset border border-zinc-200 rounded-full shadow-sm hover:bg-surface-hover transition-all overflow-hidden`}
-        aria-label={user ? 'Profile' : 'Sign in'}
-      >
-        <img
-          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"
-          className="w-full h-full object-cover"
-          alt=""
-        />
-      </Link>
+      {user ? (
+        <Link
+          to="/profile"
+          className={`${iconSize} flex items-center justify-center rounded-full shadow-sm hover:opacity-90 transition-all shrink-0 ring-2 ring-white`}
+          aria-label={`Profile (${user.name || user.email})`}
+        >
+          <UserAvatar
+            user={user}
+            className="w-full h-full"
+            textClassName={compact ? 'text-xs' : 'text-sm'}
+          />
+        </Link>
+      ) : (
+        <Link
+          to="/login"
+          className={`shrink-0 inline-flex items-center justify-center font-bold text-accent-foreground bg-accent hover:bg-accent-hover rounded-full shadow-sm transition-all active:scale-[0.98] ${
+            compact ? 'h-9 px-3.5 text-xs' : 'h-10 px-4 text-sm'
+          }`}
+        >
+          Sign in
+        </Link>
+      )}
     </div>
   )
 
   const logoMark = (showWordmark = true) => (
     <Link to="/" className="flex items-center gap-1.5 text-slate-900 hover:opacity-90 shrink-0 min-w-0">
       <span
-        className={`bg-slate-900 text-white rounded-lg flex items-center justify-center font-serif font-black shrink-0 ${
+        className={`bg-accent text-accent-foreground rounded-lg flex items-center justify-center font-serif font-black shrink-0 ${
           compact ? 'w-8 h-8 text-base' : 'w-7 h-7 text-lg'
         }`}
       >

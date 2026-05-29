@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useMemo, useEffect, useRef } from 'react'
+import { calculateCartPricing } from '../utils/pricing'
 import vrHeadset from '../assets/vr_headset.png'
 import blueHeadphones from '../assets/blue_headphones.png'
 import wirelessEarbuds from '../assets/wireless_earbuds.png'
@@ -76,6 +77,8 @@ const OFFLINE_PRODUCTS = [
 
 export const getProductId = (prod) => prod?._id || prod?.id
 
+const isValidObjectId = (id) => typeof id === 'string' && /^[a-f0-9]{24}$/i.test(id)
+
 export function CartProvider({ children }) {
   // Database states
   const [products, setProducts] = useState([])
@@ -108,6 +111,13 @@ export function CartProvider({ children }) {
   const [likes, setLikes] = useState(460)
   const [hasLiked, setHasLiked] = useState(false)
   const [showCheckoutSuccess, setShowCheckoutSuccess] = useState(false)
+  const [checkoutSuccessMode, setCheckoutSuccessMode] = useState('demo')
+  const [lastOrderId, setLastOrderId] = useState(null)
+  const [cartToast, setCartToast] = useState(null)
+  const [cartBadgePulse, setCartBadgePulse] = useState(false)
+  const [flyToCartSignal, setFlyToCartSignal] = useState(0)
+  const toastTimerRef = useRef(null)
+  const pulseTimerRef = useRef(null)
   const [cartPricing, setCartPricing] = useState({
     itemsPrice: 0,
     taxPrice: 0,
@@ -115,6 +125,17 @@ export function CartProvider({ children }) {
     totalPrice: 0
   })
   const catalogRef = useRef(null)
+  const authSyncRef = useRef(false)
+
+  const notifyAddedToCart = (product) => {
+    setCartToast({ message: 'Added to cart', name: product?.name })
+    setCartBadgePulse(true)
+    setFlyToCartSignal((n) => n + 1)
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current)
+    toastTimerRef.current = setTimeout(() => setCartToast(null), 3200)
+    pulseTimerRef.current = setTimeout(() => setCartBadgePulse(false), 650)
+  }
 
   const scrollToCatalog = () => {
     catalogRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -280,6 +301,21 @@ export function CartProvider({ children }) {
     }
   }
 
+  const resolveCartLineProduct = (item) => {
+    const productId = String(item.product?._id || item.product || '')
+    const fromCatalog = products.find((p) => String(getProductId(p)) === productId)
+    if (fromCatalog) return fromCatalog
+    if (!item.name) return null
+    return {
+      _id: productId,
+      id: productId,
+      name: item.name,
+      image: item.image,
+      price: item.price,
+      description: item.description || ''
+    }
+  }
+
   // Helper to fetch cart from backend
   const fetchDbCart = async () => {
     const token = localStorage.getItem('devcart_token')
@@ -287,26 +323,22 @@ export function CartProvider({ children }) {
     try {
       const res = await fetch('http://localhost:5000/api/cart', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         }
       })
       if (res.ok) {
         const dbCart = await res.json()
         if (dbCart && dbCart.items) {
-          const mappedItems = dbCart.items.map((item) => {
-            const fullProduct = products.find((p) => getProductId(p) === item.product) || {
-              _id: item.product,
-              id: item.product,
-              name: item.name,
-              image: item.image,
-              price: item.price,
-              description: ''
-            }
-            return {
-              product: fullProduct,
-              quantity: item.qty
-            }
-          })
+          const mappedItems = dbCart.items
+            .map((item) => {
+              const fullProduct = resolveCartLineProduct(item)
+              if (!fullProduct) return null
+              return {
+                product: fullProduct,
+                quantity: item.qty
+              }
+            })
+            .filter(Boolean)
           setCart(mappedItems)
           setCartPricing({
             itemsPrice: dbCart.summary?.itemsPrice || 0,
@@ -316,6 +348,8 @@ export function CartProvider({ children }) {
           })
           setCartSyncError(null)
           setIsBackendOnline(true)
+        } else {
+          setCart([])
         }
       } else if (res.status === 401) {
         logout()
@@ -388,24 +422,44 @@ export function CartProvider({ children }) {
     return wishlist.some((item) => getProductId(item) === productId)
   }
 
-  // On mount: silently refresh user data from server if token exists
+  // On mount: refresh user if token exists; drop legacy guest-cart storage
   useEffect(() => {
+    localStorage.removeItem('devcart_guest_cart')
     const token = localStorage.getItem('devcart_token')
     if (token) refreshUser()
   }, [])
 
-  // Fetch db cart and wishlist on login or when products list finishes loading
+  // Load account cart & wishlist when signed in
   useEffect(() => {
-    if (products.length > 0 && user) {
-      fetchDbCart()
-      fetchWishlist()
-    } else if (!user) {
+    if (products.length === 0) return
+
+    if (!user) {
       setWishlist([])
+      setCart([])
+      return
     }
+
+    if (authSyncRef.current) return
+
+    authSyncRef.current = true
+    ;(async () => {
+      try {
+        await fetchDbCart()
+        await fetchWishlist()
+      } finally {
+        authSyncRef.current = false
+      }
+    })()
   }, [products, user])
 
   // Cart operations
   const addToCart = async (product, quantity = 1) => {
+    const token = localStorage.getItem('devcart_token')
+    if (!token || !user) {
+      alert('Please sign in to add items to your cart.')
+      return
+    }
+
     const previousCart = cart
     const previousPricing = cartPricing
     setCart((prevCart) => {
@@ -421,20 +475,25 @@ export function CartProvider({ children }) {
         return [...prevCart, { product, quantity }]
       }
     })
-    setIsCartOpen(true)
+    notifyAddedToCart(product)
     setActiveProductDetail(null)
 
-    // Sync to backend DB
-    const token = localStorage.getItem('devcart_token')
-    if (token && user) {
-      try {
+    const productId = String(getProductId(product))
+
+    if (!isValidObjectId(productId)) {
+      setCartSyncError('Could not add this product. Refresh the catalog while the server is online.')
+      setCart(previousCart)
+      return
+    }
+
+    try {
         const res = await fetch('http://localhost:5000/api/cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ productId: getProductId(product), qty: quantity })
+        body: JSON.stringify({ productId, qty: quantity })
       })
         if (res.ok) {
           const data = await res.json()
@@ -459,10 +518,12 @@ export function CartProvider({ children }) {
         setCartSyncError('Could not sync cart with server. Your last change was not saved.')
         setIsBackendOnline(false)
       }
-    }
   }
 
   const updateCartQuantity = async (productId, newQuantity) => {
+    const token = localStorage.getItem('devcart_token')
+    if (!token || !user) return
+
     if (newQuantity <= 0) {
       removeFromCart(productId)
       return
@@ -477,18 +538,16 @@ export function CartProvider({ children }) {
       )
     )
 
-    // Sync to backend DB
-    const token = localStorage.getItem('devcart_token')
-    if (token && user) {
+    if (isValidObjectId(String(productId))) {
       try {
         const res = await fetch(`http://localhost:5000/api/cart/${productId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ qty: newQuantity })
-      })
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ qty: newQuantity })
+        })
         if (res.ok) {
           const data = await res.json()
           await fetchDbCart()
@@ -516,15 +575,16 @@ export function CartProvider({ children }) {
   }
 
   const removeFromCart = async (productId) => {
+    const token = localStorage.getItem('devcart_token')
+    if (!token || !user) return
+
     const previousCart = cart
     const previousPricing = cartPricing
     setCart((prevCart) =>
       prevCart.filter((item) => getProductId(item.product) !== productId)
     )
 
-    // Sync to backend DB
-    const token = localStorage.getItem('devcart_token')
-    if (token && user) {
+    if (isValidObjectId(String(productId))) {
       try {
         const res = await fetch(`http://localhost:5000/api/cart/${productId}`, {
         method: 'DELETE',
@@ -603,15 +663,26 @@ export function CartProvider({ children }) {
     return cart.reduce((total, item) => total + item.quantity, 0)
   }, [cart])
 
-  const cartSubtotal = useMemo(() => {
-    return cartPricing.itemsPrice
-  }, [cartPricing.itemsPrice])
+  const computedCartPricing = useMemo(
+    () =>
+      calculateCartPricing(
+        cart.map((item) => ({
+          price: item.product?.price,
+          qty: item.quantity
+        }))
+      ),
+    [cart]
+  )
 
-  const taxAmount = useMemo(() => cartPricing.taxPrice, [cartPricing.taxPrice])
-  const shippingCost = useMemo(() => cartPricing.shippingPrice, [cartPricing.shippingPrice])
-  const cartTotal = useMemo(() => cartPricing.totalPrice, [cartPricing.totalPrice])
+  const cartSubtotal = computedCartPricing.itemsPrice
+  const taxAmount = computedCartPricing.taxPrice
+  const shippingCost = computedCartPricing.shippingPrice
+  const cartTotal = computedCartPricing.totalPrice
 
-  const handleCheckout = (createdOrder = null) => {
+  const handleCheckout = (createdOrder = null, options = {}) => {
+    const isDemo = options.demo === true || !createdOrder
+    setCheckoutSuccessMode(isDemo ? 'demo' : 'order')
+    setLastOrderId(createdOrder?._id ?? null)
     setShowCheckoutSuccess(true)
     setCart([])
     if (createdOrder) {
@@ -640,32 +711,18 @@ export function CartProvider({ children }) {
     localStorage.setItem('devcart_token', token)
     localStorage.setItem('devcart_user', JSON.stringify(userData))
     setUser(userData)
-
-    // Sync any locally-added cart items to the backend DB so checkout works
-    setCart((currentCart) => {
-      if (currentCart.length > 0) {
-        currentCart.forEach((item) => {
-          fetch('http://localhost:5000/api/cart', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ productId: getProductId(item.product), qty: item.quantity })
-          }).catch((err) => console.warn('Cart sync on login failed for item:', err))
-        })
-      }
-      return currentCart
-    })
+    setCartSyncError(null)
   }
 
   const logout = () => {
     localStorage.removeItem('devcart_token')
     localStorage.removeItem('devcart_user')
+    localStorage.removeItem('devcart_guest_cart')
     setUser(null)
-    setCart([])
-    setCartPricing({ itemsPrice: 0, taxPrice: 0, shippingPrice: 0, totalPrice: 0 })
     setWishlist([])
+    setCart([])
+    setCartSyncError(null)
+    setCartPricing({ itemsPrice: 0, taxPrice: 0, shippingPrice: 0, totalPrice: 0 })
   }
 
   const clearWishlist = async () => {
@@ -744,6 +801,12 @@ export function CartProvider({ children }) {
         hasLiked,
         showCheckoutSuccess,
         setShowCheckoutSuccess,
+        checkoutSuccessMode,
+        lastOrderId,
+        cartToast,
+        setCartToast,
+        cartBadgePulse,
+        flyToCartSignal,
         categoryIdToNameMap,
         categories,
         filteredProducts,
