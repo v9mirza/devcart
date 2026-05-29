@@ -10,8 +10,14 @@ export default function WishlistDrawer() {
     toggleWishlist,
     clearWishlist,
     addToCart,
-    getProductImage
+    getProductImage,
+    setActiveProductDetail
   } = useCart()
+
+  const openProductDetails = (product) => {
+    setActiveProductDetail(product)
+    setIsWishlistOpen(false)
+  }
 
   return (
     <DrawerShell open={isWishlistOpen} onClose={() => setIsWishlistOpen(false)}>
@@ -47,19 +53,31 @@ export default function WishlistDrawer() {
         {wishlist.length > 0 ? (
           wishlist.map((product, idx) => (
             <div key={`${getProductId(product)}-${idx}`} className="py-4.5 flex gap-4 items-center">
-              <div className="w-16 h-16 bg-surface border border-zinc-200/60 rounded-xl overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => openProductDetails(product)}
+                className="w-16 h-16 bg-surface border border-zinc-200/60 rounded-xl overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0 hover:ring-2 hover:ring-accent/30 transition-shadow cursor-pointer"
+                aria-label={`View ${product.name}`}
+              >
                 <ProductImage
                   product={product}
                   getProductImage={getProductImage}
                   className="object-contain w-full h-full"
                 />
-              </div>
+              </button>
 
               <div className="flex-1 min-w-0">
                 <h4 className="font-extrabold text-sm text-slate-900 truncate leading-snug">
                   {product.name}
                 </h4>
                 <span className="block text-xs font-black text-slate-900 mt-1.5">${product.price}</span>
+                <button
+                  type="button"
+                  onClick={() => openProductDetails(product)}
+                  className="text-[11px] font-bold text-accent hover:text-accent-hover mt-1 cursor-pointer"
+                >
+                  View details
+                </button>
               </div>
 
               <div className="flex flex-col items-end gap-2">

@@ -149,7 +149,11 @@ export default function Header({ compact = false }) {
         d
       </span>
       {showWordmark && (
-        <span className={`font-extrabold tracking-tighter truncate ${compact ? 'hidden' : 'text-xl'}`}>
+        <span
+          className={`font-extrabold tracking-tighter truncate ${
+            compact ? 'text-sm sm:text-base' : 'text-xl'
+          }`}
+        >
           devcart.
         </span>
       )}
@@ -162,7 +166,7 @@ export default function Header({ compact = false }) {
       <div className={`md:hidden ${compact ? 'flex items-center gap-2' : 'flex flex-col gap-2.5'}`}>
         {compact ? (
           <>
-            {logoMark(false)}
+            {logoMark(true)}
             <SearchField compact searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             {iconButtons}
           </>

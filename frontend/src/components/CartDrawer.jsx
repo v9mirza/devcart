@@ -20,8 +20,14 @@ export default function CartDrawer() {
     handleCheckout,
     isBackendOnline,
     cartSyncError,
-    user
+    user,
+    setActiveProductDetail
   } = useCart()
+
+  const openProductDetails = (product) => {
+    setActiveProductDetail(product)
+    setIsCartOpen(false)
+  }
 
   const handleDemoCheckout = () => {
     handleCheckout(null, { demo: true })
@@ -52,21 +58,31 @@ export default function CartDrawer() {
             {cart.length > 0 ? (
               cart.map((item, idx) => (
                 <div key={`${getProductId(item.product)}-${idx}`} className="py-4.5 flex gap-4 items-center">
-                  {/* Thumbnail */}
-                  <div className="w-16 h-16 bg-stone-100 rounded-xl overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => openProductDetails(item.product)}
+                    className="w-16 h-16 bg-stone-100 rounded-xl overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0 hover:ring-2 hover:ring-accent/30 transition-shadow cursor-pointer"
+                    aria-label={`View ${item.product.name}`}
+                  >
                     <ProductImage
                       product={item.product}
                       getProductImage={getProductImage}
                       className="object-contain w-full h-full"
                     />
-                  </div>
-                  
-                  {/* Metadata */}
+                  </button>
+
                   <div className="flex-1 min-w-0">
                     <h4 className="font-extrabold text-sm text-slate-900 truncate leading-snug">
                       {item.product.name}
                     </h4>
                     <span className="block text-xs font-black text-slate-900 mt-1.5">${item.product.price}</span>
+                    <button
+                      type="button"
+                      onClick={() => openProductDetails(item.product)}
+                      className="text-[11px] font-bold text-accent hover:text-accent-hover mt-1 cursor-pointer"
+                    >
+                      View details
+                    </button>
                   </div>
 
                   {/* Quantity Actions */}
