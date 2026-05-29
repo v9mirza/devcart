@@ -59,7 +59,7 @@ export default function CatalogSection() {
   )
 
   return (
-    <section ref={catalogRef} className="pt-10 border-t border-stone-200/50 flex flex-col gap-6">
+    <section ref={catalogRef} className="scroll-mt-[5.5rem] md:scroll-mt-24 pt-10 border-t border-stone-200/50 flex flex-col gap-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-black text-slate-900 tracking-tight">Explore Our Collection</h2>
