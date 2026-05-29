@@ -11,9 +11,9 @@ export default function HomePage() {
   const { showCheckoutSuccess, setShowCheckoutSuccess } = useCart()
 
   return (
-    <div className="w-full min-h-screen py-5 px-3 md:px-6 flex justify-center items-start">
-      <div className="w-full max-w-[1280px] bg-shell rounded-[30px] border border-zinc-200 shadow-[0_18px_44px_-24px_rgba(20,24,36,0.12)] p-4 md:p-6 flex flex-col gap-7 relative overflow-hidden">
-        <div className="relative z-10 flex flex-col gap-7">
+    <div className="w-full min-h-screen py-3 sm:py-5 px-3 sm:px-4 md:px-6 flex justify-center items-start">
+      <div className="w-full max-w-[1280px] bg-shell rounded-[20px] sm:rounded-[30px] border border-zinc-200 shadow-[0_18px_44px_-24px_rgba(20,24,36,0.12)] p-3 sm:p-4 md:p-6 flex flex-col gap-5 sm:gap-7 relative overflow-hidden">
+        <div className="relative z-10 flex flex-col gap-4 sm:gap-6 lg:gap-7">
           {/* Navigation / Header */}
           <Header />
 

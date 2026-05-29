@@ -220,19 +220,32 @@ export function CartProvider({ children }) {
 
   // Prefer real product URLs from the database; only fall back to local assets offline.
   const getProductImage = (product) => {
-    if (!product) return ''
+    if (!product) return blueHeadphones
     const productName = String(product.name || '').toLowerCase()
 
-    // Keep New Gen X-Bud image consistent with local design asset.
-    if (productName.includes('new gen x-bud') || productName.includes('x-bud')) {
+    if (productName.includes('x-bud') || productName.includes('earbud')) {
       return wirelessEarbuds
     }
-
-    if (typeof product.image === 'string' && /^https?:\/\//.test(product.image)) {
-      return product.image
+    if (
+      productName.includes('sequoia') ||
+      productName.includes('musico') ||
+      productName.includes('wireless headset')
+    ) {
+      return blueHeadphones
     }
-    // If image is a module import (bundled asset), it will be a string path too — return as-is.
-    return product.image || ''
+    if (productName.includes('vr') || productName.includes('aura')) {
+      return vrHeadset
+    }
+    if (productName.includes('headphone') || productName.includes('headset') || productName.includes('surface')) {
+      return blueHeadphones
+    }
+
+    const image = product.image
+    if (typeof image === 'string' && image.length > 0) {
+      if (image.includes('source.unsplash.com')) return blueHeadphones
+      if (/^https?:\/\//.test(image)) return image
+    }
+    return image || blueHeadphones
   }
 
   const getProductColors = (product) => {

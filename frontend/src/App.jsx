@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
+import PageLayout from './components/PageLayout'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
@@ -12,10 +13,38 @@ function App() {
       <CartProvider>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route
+            path="/login"
+            element={
+              <PageLayout>
+                <LoginPage />
+              </PageLayout>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PageLayout>
+                <SignupPage />
+              </PageLayout>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PageLayout maxWidth="max-w-2xl">
+                <ProfilePage />
+              </PageLayout>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <PageLayout maxWidth="max-w-4xl">
+                <CheckoutPage />
+              </PageLayout>
+            }
+          />
         </Routes>
       </CartProvider>
     </Router>

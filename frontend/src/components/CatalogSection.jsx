@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useCart, getProductId } from '../context/CartContext'
+import ProductImage from './ProductImage'
 
 export default function CatalogSection() {
   const [sortBy, setSortBy] = useState('featured')
@@ -78,7 +79,7 @@ export default function CatalogSection() {
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
                 selectedCategory === cat
                   ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-inset text-stone-600 border border-stone-300/60 hover:bg-inset-hover'
+                  : 'bg-inset text-stone-600 border border-zinc-200 hover:bg-surface-hover'
               } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
               {cat}
@@ -91,7 +92,7 @@ export default function CatalogSection() {
         <button
           type="button"
           onClick={() => setSelectedCategory('All')}
-          className="text-xs font-semibold px-3 py-1.5 rounded-full border border-stone-300/70 bg-inset text-stone-600 hover:bg-inset-hover transition-colors cursor-pointer"
+          className="text-xs font-semibold px-3 py-1.5 rounded-full border border-zinc-200 bg-inset text-stone-600 hover:bg-surface-hover transition-colors cursor-pointer"
         >
           Reset filters
         </button>
@@ -124,18 +125,17 @@ export default function CatalogSection() {
           ))}
         </div>
       ) : displayedProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {displayedProducts.map((prod) => (
             <div 
               key={getProductId(prod)} 
-              className="bg-inset rounded-[22px] p-5 border border-stone-300/40 shadow-sm flex flex-col justify-between group transition-all duration-300 hover:shadow-md hover:scale-[1.01]"
+              className="bg-inset rounded-[22px] p-4 sm:p-5 border border-zinc-200/80 shadow-sm flex flex-col justify-between group transition-all duration-300 hover:shadow-md md:hover:scale-[1.01]"
             >
-              {/* Image container */}
-              <div className="h-44 w-full bg-surface rounded-[18px] border border-zinc-200/60 flex items-center justify-center p-4 relative overflow-hidden mb-4">
-                <img 
-                  src={getProductImage(prod)} 
-                  className="h-full object-contain transition-transform duration-500 group-hover:scale-105 filter drop-shadow-md" 
-                  alt={prod.name} 
+              <div className="h-40 sm:h-44 w-full bg-surface rounded-[18px] border border-zinc-200/60 flex items-center justify-center p-4 relative overflow-hidden mb-4">
+                <ProductImage
+                  product={prod}
+                  getProductImage={getProductImage}
+                  className="h-full max-h-full w-full object-contain transition-transform duration-500 group-hover:scale-105 drop-shadow-md"
                 />
                 <span className="absolute top-3 left-3 bg-stone-100/80 backdrop-blur-xs text-[10px] text-stone-500 font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider">
                   {categoryIdToNameMap[prod.category] || prod.category}
@@ -169,8 +169,8 @@ export default function CatalogSection() {
                     </h3>
                     <span className="font-black text-md text-slate-900">${prod.price}</span>
                   </div>
-                  <p className="text-xs text-stone-400 font-medium line-clamp-2 mb-3 leading-relaxed">
-                    {prod.description}
+                  <p className="text-xs text-stone-500 font-medium line-clamp-3 sm:line-clamp-2 mb-3 leading-relaxed">
+                    {prod.description || 'Premium quality product with fast shipping and easy returns.'}
                   </p>
                   {/* Stock badge */}
                   {prod.countInStock !== undefined && (

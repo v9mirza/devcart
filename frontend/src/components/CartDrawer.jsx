@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useCart, getProductId } from '../context/CartContext'
+import ProductImage from './ProductImage'
 
 export default function CartDrawer() {
   const {
@@ -30,8 +31,8 @@ export default function CartDrawer() {
       />
 
       {/* Slide panel */}
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-surface border-l border-stone-200/50 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.34)] flex flex-col justify-between">
+      <div className="absolute inset-y-0 right-0 w-full flex justify-end">
+        <div className="w-full sm:max-w-md bg-surface border-l border-zinc-200 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.34)] flex flex-col justify-between h-full">
           
           {/* Header */}
           <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between">
@@ -59,7 +60,11 @@ export default function CartDrawer() {
                 <div key={`${getProductId(item.product)}-${idx}`} className="py-4.5 flex gap-4 items-center">
                   {/* Thumbnail */}
                   <div className="w-16 h-16 bg-stone-100 rounded-xl overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0">
-                    <img src={getProductImage(item.product)} className="object-contain w-full h-full" alt="" />
+                    <ProductImage
+                      product={item.product}
+                      getProductImage={getProductImage}
+                      className="object-contain w-full h-full"
+                    />
                   </div>
                   
                   {/* Metadata */}
