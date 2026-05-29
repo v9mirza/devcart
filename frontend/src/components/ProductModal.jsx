@@ -30,88 +30,100 @@ export default function ProductModal() {
       : 'Product')
 
   const description = getDescription(activeProductDetail)
+  const inWishlist = isProductInWishlist(productId)
+  const outOfStock = activeProductDetail.countInStock === 0
+  const lowStock =
+    activeProductDetail.countInStock !== undefined &&
+    activeProductDetail.countInStock > 0 &&
+    activeProductDetail.countInStock <= 5
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="product-modal-title"
     >
       <div
         onClick={() => setActiveProductDetail(null)}
-        className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-slate-950/45 backdrop-blur-[3px]"
       />
 
-      <div className="relative z-10 bg-surface w-full sm:max-w-[720px] max-h-[min(92dvh,100%)] sm:max-h-[min(560px,calc(100dvh-2rem))] rounded-t-2xl sm:rounded-2xl border border-zinc-200 shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-zinc-100 shrink-0">
-          <span className="text-[10px] font-extrabold text-slate-600 bg-inset border border-zinc-200 px-2.5 py-1 rounded-md uppercase tracking-wider">
-            {categoryLabel}
-          </span>
-          <button
-            type="button"
-            onClick={() => setActiveProductDetail(null)}
-            className="w-9 h-9 rounded-full bg-inset hover:bg-surface-hover text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-            aria-label="Close"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+      <div className="relative z-10 bg-surface w-full sm:max-w-[min(100%,680px)] md:max-w-[760px] max-h-[min(94dvh,100%)] rounded-t-[20px] sm:rounded-[24px] border border-zinc-200/90 shadow-[0_28px_70px_-24px_rgba(15,23,42,0.4)] flex flex-col overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setActiveProductDetail(null)}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-9 h-9 rounded-full bg-surface/95 border border-zinc-200 text-slate-600 flex items-center justify-center shadow-sm hover:bg-inset transition-colors cursor-pointer"
+          aria-label="Close"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
 
-        {/* Scrollable content — description lives here so it is never clipped by sticky footer */}
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-          <div className="flex flex-col md:flex-row md:items-start">
-            <div className="md:w-[40%] bg-inset px-4 py-5 sm:py-6 flex items-center justify-center border-b md:border-b-0 md:border-r border-zinc-200/80 shrink-0">
-              <ProductImage
-                product={activeProductDetail}
-                getProductImage={getProductImage}
-                className="w-full max-w-[220px] h-36 sm:h-44 md:h-48 object-contain drop-shadow-lg"
-              />
+          <div className="flex flex-col md:flex-row md:min-h-[320px]">
+            {/* Image */}
+            <div className="md:w-[42%] flex items-center justify-center bg-inset/80 px-5 pt-5 pb-4 md:py-8 md:px-6 md:border-r border-zinc-200/70 shrink-0">
+              <div className="w-full max-w-[260px] md:max-w-none rounded-2xl bg-surface border border-zinc-200/80 p-4 sm:p-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.15)]">
+                <ProductImage
+                  product={activeProductDetail}
+                  getProductImage={getProductImage}
+                  className="w-full h-[min(38vw,200px)] md:h-[220px] object-contain mx-auto"
+                />
+              </div>
             </div>
 
-            <div className="md:w-[60%] px-4 py-4 sm:px-5 sm:py-5 space-y-3">
-              <h2
-                id="product-modal-title"
-                className="text-xl sm:text-2xl font-black text-slate-900 leading-tight"
-              >
-                {activeProductDetail.name}
-              </h2>
+            {/* Details */}
+            <div className="md:w-[58%] px-5 pb-5 pt-1 md:py-6 md:pr-6 md:pl-5 flex flex-col gap-4">
+              <div className="space-y-2 pr-10 md:pr-12">
+                <p className="text-[10px] font-extrabold text-stone-400 uppercase tracking-[0.14em]">
+                  {categoryLabel}
+                </p>
+                <h2
+                  id="product-modal-title"
+                  className="text-[1.35rem] sm:text-2xl md:text-[1.65rem] font-black text-slate-900 leading-[1.15] tracking-tight"
+                >
+                  {activeProductDetail.name}
+                </h2>
+              </div>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <span className="text-xl font-black text-slate-900">${activeProductDetail.price}</span>
-                <span className="flex items-center gap-1 text-xs text-stone-500 font-bold">
-                  <span className="text-yellow-500">★</span>
-                  <span className="text-slate-800">{activeProductDetail.rating || 4.7}</span>
-                  <span>({activeProductDetail.reviewsCount || 100} reviews)</span>
+              <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+                <span className="text-2xl sm:text-[1.75rem] font-black text-slate-900 leading-none">
+                  ${activeProductDetail.price}
+                </span>
+                <span className="flex items-center gap-1 text-xs font-semibold text-stone-500 pb-0.5">
+                  <span className="text-amber-500 text-sm">★</span>
+                  <span className="text-slate-800 font-bold">{activeProductDetail.rating || 4.7}</span>
+                  <span className="text-stone-400">
+                    ({activeProductDetail.reviewsCount || 100} reviews)
+                  </span>
                 </span>
               </div>
 
               {activeProductDetail.countInStock !== undefined && (
                 <span
-                  className={`inline-flex w-fit text-[10px] font-extrabold px-2.5 py-1 rounded-full ${
-                    activeProductDetail.countInStock === 0
-                      ? 'bg-red-50 text-red-600 border border-red-100'
-                      : activeProductDetail.countInStock <= 5
-                      ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                      : 'bg-green-50 text-green-700 border border-green-100'
+                  className={`inline-flex w-fit text-[11px] font-bold px-2.5 py-1 rounded-full ${
+                    outOfStock
+                      ? 'bg-red-50 text-red-600 ring-1 ring-red-100'
+                      : lowStock
+                      ? 'bg-amber-50 text-amber-800 ring-1 ring-amber-100'
+                      : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'
                   }`}
                 >
-                  {activeProductDetail.countInStock === 0
-                    ? 'Out of Stock'
-                    : activeProductDetail.countInStock <= 5
+                  {outOfStock
+                    ? 'Out of stock'
+                    : lowStock
                     ? `Only ${activeProductDetail.countInStock} left`
-                    : 'In Stock'}
+                    : 'In stock'}
                 </span>
               )}
 
-              <section className="pt-1 pb-2">
-                <h3 className="text-[10px] font-extrabold text-stone-400 uppercase tracking-wider mb-1.5">
+              <section className="rounded-xl bg-inset/80 border border-zinc-200/70 p-3.5 sm:p-4">
+                <h3 className="text-[10px] font-extrabold text-stone-400 uppercase tracking-[0.12em] mb-2">
                   Description
                 </h3>
-                <p className="text-sm text-stone-600 leading-relaxed font-medium">
+                <p className="text-[13px] sm:text-sm text-stone-600 leading-[1.65] font-medium">
                   {description}
                 </p>
               </section>
@@ -119,31 +131,31 @@ export default function ProductModal() {
           </div>
         </div>
 
-        {/* Sticky footer actions */}
-        <div className="shrink-0 border-t border-zinc-100 bg-surface px-4 py-3 sm:px-5 sm:py-4 safe-area-pb">
-          <div className="flex items-center gap-2.5">
+        {/* Actions */}
+        <div className="shrink-0 border-t border-zinc-100 bg-surface/95 backdrop-blur-sm px-4 py-3.5 sm:px-6 sm:py-4 safe-area-pb">
+          <div className="flex items-stretch gap-3 max-w-2xl md:ml-auto md:max-w-none md:w-full">
             <button
               type="button"
               onClick={() => addToCart(activeProductDetail, 1)}
-              disabled={activeProductDetail.countInStock === 0}
-              className="flex-1 bg-slate-950 hover:bg-slate-800 text-white font-bold py-3 rounded-full text-center text-sm shadow-md transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              disabled={outOfStock}
+              className="flex-1 min-h-[46px] bg-slate-950 hover:bg-slate-800 text-white font-bold text-sm sm:text-[15px] rounded-full shadow-md transition-all active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
-              {activeProductDetail.countInStock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              {outOfStock ? 'Out of Stock' : 'Add to Cart'}
             </button>
 
             <button
               type="button"
               onClick={() => toggleWishlist(activeProductDetail)}
-              className={`h-11 w-11 rounded-full border flex items-center justify-center shrink-0 transition-all cursor-pointer ${
-                isProductInWishlist(productId)
-                  ? 'bg-rose-50 border-rose-200 text-rose-500'
-                  : 'bg-inset border-zinc-200 text-stone-600 hover:bg-surface-hover'
+              className={`min-h-[46px] min-w-[46px] rounded-full border flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+                inWishlist
+                  ? 'bg-rose-50 border-rose-200 text-rose-500 shadow-sm'
+                  : 'bg-inset border-zinc-200 text-stone-500 hover:bg-surface-hover hover:text-rose-500 hover:border-rose-200'
               }`}
-              aria-label="Toggle wishlist"
+              aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
             >
               <svg
                 className="w-5 h-5"
-                fill={isProductInWishlist(productId) ? 'currentColor' : 'none'}
+                fill={inWishlist ? 'currentColor' : 'none'}
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
