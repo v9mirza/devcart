@@ -44,7 +44,7 @@ function App() {
           <Route
             path="/profile"
             element={
-              <PageLayout maxWidth="max-w-2xl">
+              <PageLayout maxWidth="max-w-3xl">
                 <ProfilePage />
               </PageLayout>
             }

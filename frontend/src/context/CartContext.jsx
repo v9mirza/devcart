@@ -289,6 +289,7 @@ export function CartProvider({ children }) {
           name: freshUser.name,
           email: freshUser.email,
           isAdmin: freshUser.isAdmin,
+          createdAt: freshUser.createdAt,
           shippingAddress: freshUser.shippingAddress || { address: '', city: '', postalCode: '', country: '' }
         }
         localStorage.setItem('devcart_user', JSON.stringify(userData))
