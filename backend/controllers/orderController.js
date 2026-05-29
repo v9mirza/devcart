@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const mongoose = require("mongoose");
+const { calculatePricing } = require("../utils/pricing");
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -30,7 +31,6 @@ exports.addOrderItems = async (req, res) => {
     const productMap = new Map(products.map((product) => [product._id.toString(), product]));
 
     const orderItems = [];
-    let itemsPrice = 0;
 
     for (const item of cart.items) {
       const product = productMap.get(item.product.toString());
@@ -49,13 +49,9 @@ exports.addOrderItems = async (req, res) => {
         price: product.price,
         product: product._id,
       });
-
-      itemsPrice += product.price * item.qty;
     }
 
-    const taxPrice = 0;
-    const shippingPrice = itemsPrice > 0 ? 100 : 0;
-    const totalPrice = itemsPrice + taxPrice + shippingPrice;
+    const { itemsPrice, taxPrice, shippingPrice, totalPrice } = calculatePricing(orderItems);
 
     const stockOps = cart.items.map((item) => ({
       updateOne: {

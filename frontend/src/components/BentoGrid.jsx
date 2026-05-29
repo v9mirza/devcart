@@ -9,8 +9,6 @@ export default function BentoGrid() {
     loading,
     products,
     spotlightProduct,
-    spotlightColor,
-    setSpotlightColor,
     colorsMap,
     getProductImage,
     getProductColors,
@@ -20,8 +18,6 @@ export default function BentoGrid() {
 
   const spotlightSoundName = spotlightProduct?.name?.split(' ')[0] || 'Sequoia'
   const spotlightRating = Number(spotlightProduct?.rating || 4.8).toFixed(1)
-  const spotlightColors = spotlightProduct ? getProductColors(spotlightProduct) : []
-
   // Pick specific DB products so the UI matches the reference screenshot.
   const earbudCardProduct =
     products.find((p) => (p.name || '').toLowerCase().includes('x-bud')) ||
@@ -64,7 +60,7 @@ export default function BentoGrid() {
 
   const HeroSkeleton = () => (
     <div
-      className="rounded-[28px] overflow-hidden relative border border-stone-200/70 bg-[#f7f7f4] animate-pulse"
+      className="rounded-[24px] overflow-hidden relative border border-stone-300/70 bg-page animate-pulse"
       style={{ minHeight: 460 }}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 h-full">
@@ -105,11 +101,7 @@ export default function BentoGrid() {
         ) : (
           spotlightProduct && (
           <div
-            className="rounded-[28px] overflow-hidden relative flex flex-col md:flex-row border border-stone-200/70"
-            style={{
-              background: '#f5f7f3',
-              minHeight: 460
-            }}
+            className="rounded-[24px] overflow-hidden relative flex flex-col md:flex-row border border-zinc-200/70 bg-surface min-h-[460px]"
           >
             {/* Ambient glow blobs */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -120,14 +112,14 @@ export default function BentoGrid() {
             {/* LEFT: focused value proposition */}
             <div className="relative z-10 flex flex-col justify-between p-7 md:p-9 flex-1 min-w-0">
               <div>
-                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-stone-500 mb-5 border border-stone-200 px-3 py-1.5 rounded-full bg-white/70">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-stone-600 mb-5 border border-stone-300 px-3 py-1.5 rounded-full bg-surface">
                   <svg className="w-3 h-3 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                   Premium audio experience
                 </span>
 
-                <h1 className="text-4xl md:text-[54px] font-black text-slate-900 tracking-tight leading-[1.03] mb-4">
+                <h1 className="text-3xl sm:text-4xl md:text-[52px] font-black text-slate-900 tracking-tight leading-[1.03] mb-4">
                   {spotlightProduct.name}
                 </h1>
                 <p className="text-sm md:text-[15px] text-stone-600 font-medium leading-relaxed max-w-[460px]">
@@ -135,10 +127,10 @@ export default function BentoGrid() {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2.5 mt-6">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-white border border-stone-200 px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-surface border border-stone-300 px-2.5 py-1 rounded-full">
                     ★ {spotlightRating}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-white border border-stone-200 px-2.5 py-1 rounded-full">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-surface border border-stone-300 px-2.5 py-1 rounded-full">
                     ${spotlightProduct.price}
                   </span>
                   {spotlightProduct.countInStock !== undefined && (
@@ -163,7 +155,7 @@ export default function BentoGrid() {
                 <div className="flex items-center gap-3 flex-wrap">
                   <button
                     onClick={scrollToCatalog}
-                    className="bg-[#d9f662] hover:bg-[#ceef53] text-slate-950 font-bold px-5 py-3 rounded-full inline-flex items-center gap-3 transition-all duration-200 hover:scale-[1.03] active:scale-95 cursor-pointer shadow-lg shadow-lime-300/20"
+                    className="w-full sm:w-auto justify-center bg-[#d9f662] hover:bg-[#ceef53] text-slate-950 font-bold px-5 py-3 rounded-full inline-flex items-center gap-3 transition-all duration-200 hover:scale-[1.02] active:scale-95 cursor-pointer shadow-sm"
                   >
                     Shop Collection
                     <span className="w-7 h-7 rounded-full bg-slate-950 text-white flex items-center justify-center">
@@ -173,16 +165,16 @@ export default function BentoGrid() {
                   <button
                     type="button"
                     onClick={() => setActiveProductDetail(spotlightProduct)}
-                    className="bg-white hover:bg-stone-50 text-slate-800 border border-stone-200 font-bold px-5 py-3 rounded-full inline-flex items-center gap-2 transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+                    className="w-full sm:w-auto justify-center bg-surface hover:bg-surface-hover text-slate-800 border border-stone-300 font-bold px-5 py-3 rounded-full inline-flex items-center gap-2 transition-all duration-200 hover:scale-[1.01] cursor-pointer"
                   >
                     View Product
                   </button>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[11px] font-semibold text-stone-600 bg-white/80 border border-stone-200 px-2.5 py-1 rounded-full">
+                  <span className="text-[11px] font-semibold text-stone-600 bg-surface border border-stone-300 px-2.5 py-1 rounded-full">
                     Free shipping over $350
                   </span>
-                  <span className="text-[11px] font-semibold text-stone-600 bg-white/80 border border-stone-200 px-2.5 py-1 rounded-full">
+                  <span className="text-[11px] font-semibold text-stone-600 bg-surface border border-stone-300 px-2.5 py-1 rounded-full">
                     2-year warranty
                   </span>
                 </div>
@@ -200,7 +192,7 @@ export default function BentoGrid() {
               <div className="absolute bottom-20 left-6 w-5 h-5 bg-stone-100 rounded-full border border-stone-300/70" />
               <div className="absolute bottom-10 right-24 w-3 h-3 bg-slate-300 rounded-full" />
               <div className="absolute top-1/2 right-1/2 w-2 h-2 bg-slate-300 rounded-full" />
-              <div className="relative z-10 w-[86%] max-w-[500px] rounded-[26px] border border-stone-200/80 bg-white/60 backdrop-blur-sm p-4 md:p-5 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.35)]">
+              <div className="relative z-10 w-[86%] max-w-[500px] rounded-[26px] border border-stone-300/80 bg-surface/90 backdrop-blur-sm p-4 md:p-5 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.35)]">
                 <img
                   src={getProductImage(spotlightProduct)}
                   onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = blueHeadphones }}
@@ -220,27 +212,11 @@ export default function BentoGrid() {
                   e.stopPropagation()
                   setActiveProductDetail(spotlightProduct)
                 }}
-                className="absolute top-5 right-5 z-20 w-9 h-9 rounded-full bg-white/70 border border-stone-200/70 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-white transition-colors"
+                className="absolute top-5 right-5 z-20 w-9 h-9 rounded-full bg-surface/85 border border-stone-300/70 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-surface transition-colors"
                 aria-label="Open product"
               >
                 <ArrowIcon />
               </button>
-              {/* Color selector pills at bottom of image area */}
-              <div className="absolute bottom-5 right-0 left-0 flex justify-center">
-                <div className="inline-flex items-center gap-2 bg-white/85 border border-stone-200 rounded-full px-3 py-1.5 shadow-sm">
-                  <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Colors</span>
-                  {spotlightColors.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => setSpotlightColor(c)}
-                      className={`w-3 h-3 rounded-full ${colorsMap[c]} border transition-all duration-200 cursor-pointer ${
-                        spotlightColor === c ? 'border-slate-600 scale-125 shadow-sm' : 'border-stone-300 opacity-70 hover:opacity-100'
-                      }`}
-                      aria-label={c}
-                    />
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
           )
@@ -252,7 +228,7 @@ export default function BentoGrid() {
           {/* More Products */}
           <div
             onClick={scrollToCatalog}
-            className="bg-[#f6f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5"
+            className="bg-inset rounded-[22px] p-5 border border-stone-300/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5"
           >
             <div className="flex justify-between items-start">
               <div>
@@ -273,7 +249,7 @@ export default function BentoGrid() {
           </div>
 
           {/* Downloads / social stats card */}
-          <div className="bg-[#f6f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5">
+          <div className="bg-inset rounded-[22px] p-5 border border-stone-300/70 shadow-sm flex flex-col justify-between min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex -space-x-2">
                 {smallCardProducts.map((prod, i) => (
@@ -316,7 +292,7 @@ export default function BentoGrid() {
           {earbudCardProduct ? (
             <div
               onClick={() => setActiveProductDetail(earbudCardProduct)}
-              className="bg-[#f6f7f2] rounded-[22px] border border-stone-200/70 shadow-sm min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 relative overflow-hidden group"
+              className="bg-inset rounded-[22px] border border-stone-300/70 shadow-sm min-h-[210px] cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.01] hover:-translate-y-0.5 relative overflow-hidden group"
             >
               <div className="flex justify-between items-start gap-3 p-5 pb-0 relative z-10">
                 <span className="text-[10px] font-extrabold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full inline-flex items-center gap-1 border border-rose-100">
@@ -349,7 +325,7 @@ export default function BentoGrid() {
                   <span className="text-[11px] font-bold text-stone-400 flex items-center gap-0.5">
                     <span className="text-yellow-400">★</span> 4.7
                   </span>
-                  <span className="text-sm font-black text-indigo-600">${earbudCardProduct.price}</span>
+                  <span className="text-sm font-black text-slate-900">${earbudCardProduct.price}</span>
                 </div>
               </div>
             </div>
@@ -361,20 +337,17 @@ export default function BentoGrid() {
       </div>
 
       {/* ══════════ RIGHT COLUMN ══════════ */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 lg:pt-1">
 
         {/* Popular Colors */}
         {spotlightProduct && (
-          <div className="bg-[#f6f7f2] rounded-[22px] p-5 border border-stone-200/70 shadow-sm">
+          <div className="bg-inset rounded-[22px] p-5 border border-stone-300/70 shadow-sm">
             <h3 className="text-sm font-extrabold text-slate-800 mb-3">Popular Colors</h3>
             <div className="flex gap-2.5 flex-wrap">
               {getProductColors(spotlightProduct).map((c) => (
-                <button
+                <span
                   key={c}
-                  onClick={() => setSpotlightColor(c)}
-                  className={`w-8 h-8 rounded-full ${colorsMap[c]} border border-white/80 transition-all duration-200 cursor-pointer ${
-                    spotlightColor === c ? 'ring-2 ring-offset-2 ring-slate-500 scale-110 shadow-md' : 'opacity-80 hover:opacity-100 hover:scale-105'
-                  }`}
+                  className={`w-8 h-8 rounded-full ${colorsMap[c]} border border-white/80 opacity-90`}
                   aria-label={c}
                 />
               ))}
@@ -386,7 +359,7 @@ export default function BentoGrid() {
         {earbudCardProduct && (
           <div
             onClick={() => setActiveProductDetail(earbudCardProduct)}
-            className="bg-white rounded-[22px] overflow-hidden border border-stone-200/70 shadow-sm relative group hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-0.5 flex flex-col min-h-[200px]"
+            className="bg-inset rounded-[22px] overflow-hidden border border-zinc-200/70 shadow-sm relative group hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-0.5 flex flex-col min-h-[200px]"
           >
             <div className="p-4 flex justify-between items-start relative z-10">
               <h2 className="text-sm font-extrabold text-slate-900 leading-tight">{earbudCardProduct.name}</h2>

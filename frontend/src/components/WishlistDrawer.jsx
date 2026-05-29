@@ -8,8 +8,7 @@ export default function WishlistDrawer() {
     toggleWishlist,
     clearWishlist,
     addToCart,
-    getProductImage,
-    colorsMap
+    getProductImage
   } = useCart()
 
   if (!isWishlistOpen) return null
@@ -24,7 +23,7 @@ export default function WishlistDrawer() {
 
       {/* Slide panel */}
       <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white border-l border-stone-200/50 shadow-2xl flex flex-col justify-between">
+        <div className="w-screen max-w-md bg-surface border-l border-stone-200/50 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.34)] flex flex-col justify-between">
           
           {/* Header */}
           <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between">
@@ -61,7 +60,7 @@ export default function WishlistDrawer() {
               wishlist.map((product, idx) => (
                 <div key={`${getProductId(product)}-${idx}`} className="py-4.5 flex gap-4 items-center">
                   {/* Thumbnail */}
-                  <div className="w-16 h-16 bg-[#fcfcf9] border border-stone-200/35 rounded-xl overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0">
+                  <div className="w-16 h-16 bg-surface border border-zinc-200/60 rounded-xl overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0">
                     <img src={getProductImage(product)} className="object-contain w-full h-full" alt="" />
                   </div>
                   
@@ -70,13 +69,13 @@ export default function WishlistDrawer() {
                     <h4 className="font-extrabold text-sm text-slate-900 truncate leading-snug">
                       {product.name}
                     </h4>
-                    <span className="block text-xs font-black text-indigo-600 mt-1.5">${product.price}</span>
+                    <span className="block text-xs font-black text-slate-900 mt-1.5">${product.price}</span>
                   </div>
 
                   {/* Actions */}
                   <div className="flex flex-col items-end gap-2">
                     <button
-                      onClick={() => addToCart(product, 'black', 1)}
+                      onClick={() => addToCart(product, 1)}
                       className="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-black px-3.5 py-2 rounded-full shadow-sm transition-transform duration-200 hover:scale-[1.02] cursor-pointer"
                     >
                       Add to Cart
@@ -101,10 +100,10 @@ export default function WishlistDrawer() {
           </div>
 
           {/* Close button in footer */}
-          <div className="px-6 py-5 bg-stone-50 border-t border-stone-100">
+          <div className="px-6 py-5 bg-inset border-t border-zinc-200">
             <button
               onClick={() => setIsWishlistOpen(false)}
-              className="w-full bg-slate-950 hover:bg-slate-850 text-white font-bold py-3 rounded-full text-center shadow-lg cursor-pointer"
+              className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3 rounded-full text-center shadow-sm cursor-pointer"
             >
               Continue Browsing
             </button>

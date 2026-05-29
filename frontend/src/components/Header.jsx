@@ -27,7 +27,7 @@ export default function Header() {
           placeholder="Search products..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-white/90 border border-stone-200/80 pl-5 pr-24 py-2.5 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all shadow-sm"
+          className="bg-inset border border-stone-300/80 pl-5 pr-24 py-2.5 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all shadow-sm"
         />
         {searchQuery && (
           <button
@@ -54,7 +54,7 @@ export default function Header() {
       <div className="flex items-center gap-2.5 justify-self-end">
         <button
           onClick={() => setIsCartOpen(true)}
-          className="w-10 h-10 bg-white/95 border border-stone-200/70 rounded-full flex items-center justify-center text-slate-800 hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all shadow-sm relative cursor-pointer"
+          className="w-10 h-10 bg-inset border border-stone-300/70 rounded-full flex items-center justify-center text-slate-800 hover:bg-inset-hover hover:scale-105 active:scale-95 transition-all shadow-sm relative cursor-pointer"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -71,7 +71,7 @@ export default function Header() {
           className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all shadow-sm active:scale-95 hover:scale-105 cursor-pointer relative ${
             wishlist.length > 0
               ? 'bg-rose-50 border-rose-200 text-rose-500'
-              : 'bg-white/95 border-stone-200/70 text-slate-800 hover:bg-slate-50'
+              : 'bg-inset border-stone-300/70 text-slate-800 hover:bg-inset-hover'
           }`}
         >
           <svg className="w-5 h-5" fill={wishlist.length > 0 ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@ export default function Header() {
 
         <Link
           to={user ? '/profile' : '/login'}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white/95 border border-stone-200/70 rounded-full shadow-sm hover:bg-slate-50 hover:scale-[1.02] active:scale-98 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 bg-inset border border-stone-300/70 rounded-full shadow-sm hover:bg-inset-hover hover:scale-[1.02] active:scale-98 transition-all"
         >
           <span className="text-xs font-semibold text-slate-700">{user?.name || 'Guest User'}</span>
           <img

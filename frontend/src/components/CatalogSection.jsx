@@ -37,9 +37,9 @@ export default function CatalogSection() {
   const SkeletonCard = ({ idx }) => (
     <div
       key={idx}
-      className="bg-white rounded-3xl p-5 border border-stone-200/40 shadow-sm flex flex-col justify-between animate-pulse"
+      className="bg-inset rounded-[22px] p-5 border border-stone-300/40 shadow-sm flex flex-col justify-between animate-pulse"
     >
-      <div className="h-44 w-full bg-stone-100 rounded-2xl mb-4" />
+      <div className="h-44 w-full bg-stone-100 rounded-[18px] mb-4" />
       <div className="flex-1 flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-start gap-2 mb-3">
@@ -78,7 +78,7 @@ export default function CatalogSection() {
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
                 selectedCategory === cat
                   ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-white text-stone-600 border border-stone-200/50 hover:bg-stone-50'
+                  : 'bg-inset text-stone-600 border border-stone-300/60 hover:bg-inset-hover'
               } ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
               {cat}
@@ -91,7 +91,7 @@ export default function CatalogSection() {
         <button
           type="button"
           onClick={() => setSelectedCategory('All')}
-          className="text-xs font-semibold px-3 py-1.5 rounded-full border border-stone-200/70 bg-white text-stone-600 hover:bg-stone-50 transition-colors cursor-pointer"
+          className="text-xs font-semibold px-3 py-1.5 rounded-full border border-stone-300/70 bg-inset text-stone-600 hover:bg-inset-hover transition-colors cursor-pointer"
         >
           Reset filters
         </button>
@@ -100,7 +100,7 @@ export default function CatalogSection() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-1.5 rounded-full border border-stone-200/70 bg-white text-stone-700 font-semibold focus:outline-none focus:ring-2 focus:ring-slate-300"
+            className="px-3 py-1.5 rounded-full border border-stone-300/70 bg-inset text-stone-700 font-semibold focus:outline-none focus:ring-2 focus:ring-slate-300"
           >
             <option value="featured">Featured</option>
             <option value="price-low-high">Price: Low to High</option>
@@ -113,7 +113,7 @@ export default function CatalogSection() {
 
       {/* Dynamic Grid */}
       {error && !loading ? (
-        <div className="text-center py-10 bg-white rounded-3xl border border-stone-200/40">
+        <div className="text-center py-10 bg-inset rounded-[22px] border border-stone-300/40">
           <h3 className="text-md font-bold text-slate-800">We couldn’t load the latest products.</h3>
           <p className="text-xs text-stone-400 mt-1">You can still browse what’s available right now.</p>
         </div>
@@ -128,10 +128,10 @@ export default function CatalogSection() {
           {displayedProducts.map((prod) => (
             <div 
               key={getProductId(prod)} 
-              className="bg-white rounded-3xl p-5 border border-stone-200/40 shadow-sm flex flex-col justify-between group transition-all duration-300 hover:shadow-md hover:scale-[1.01]"
+              className="bg-inset rounded-[22px] p-5 border border-stone-300/40 shadow-sm flex flex-col justify-between group transition-all duration-300 hover:shadow-md hover:scale-[1.01]"
             >
               {/* Image container */}
-              <div className="h-44 w-full bg-[#fcfcf9] rounded-2xl flex items-center justify-center p-4 relative overflow-hidden mb-4">
+              <div className="h-44 w-full bg-surface rounded-[18px] border border-zinc-200/60 flex items-center justify-center p-4 relative overflow-hidden mb-4">
                 <img 
                   src={getProductImage(prod)} 
                   className="h-full object-contain transition-transform duration-500 group-hover:scale-105 filter drop-shadow-md" 
@@ -164,10 +164,10 @@ export default function CatalogSection() {
               <div className="flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start gap-2 mb-1.5">
-                    <h3 className="font-extrabold text-md text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">
+                    <h3 className="font-extrabold text-md text-slate-900 group-hover:text-slate-700 transition-colors leading-tight">
                       {prod.name}
                     </h3>
-                    <span className="font-black text-md text-indigo-600">${prod.price}</span>
+                    <span className="font-black text-md text-slate-900">${prod.price}</span>
                   </div>
                   <p className="text-xs text-stone-400 font-medium line-clamp-2 mb-3 leading-relaxed">
                     {prod.description}
@@ -203,7 +203,7 @@ export default function CatalogSection() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 bg-white rounded-3xl border border-stone-200/40">
+        <div className="text-center py-16 bg-inset rounded-[22px] border border-stone-300/40">
           <div className="w-14 h-14 rounded-full bg-stone-50 border border-stone-100 flex items-center justify-center mx-auto">
             <svg className="w-6 h-6 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

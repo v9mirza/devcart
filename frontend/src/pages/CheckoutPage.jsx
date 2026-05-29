@@ -12,7 +12,8 @@ export default function CheckoutPage() {
     handleCheckout,
     getProductImage,
     logout,
-    user
+    user,
+    isBackendOnline
   } = useCart()
 
   const [address, setAddress] = useState('')
@@ -47,6 +48,11 @@ export default function CheckoutPage() {
       setLoading(false)
       return
     }
+    if (!isBackendOnline) {
+      setError('Server offline. Checkout is temporarily unavailable.')
+      setLoading(false)
+      return
+    }
 
     try {
       // 1. Send cart items to the database cart endpoint first if required by the API,
@@ -76,7 +82,7 @@ export default function CheckoutPage() {
       }
 
       // Trigger checkout success state in context
-      handleCheckout()
+      handleCheckout(data)
       navigate('/')
     } catch (err) {
       setError(err.message)
@@ -111,6 +117,11 @@ export default function CheckoutPage() {
             )}
           </div>
         )}
+        {!isBackendOnline && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-4 py-3 rounded-xl">
+            Server offline. You can browse products, but checkout is temporarily disabled.
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -121,7 +132,7 @@ export default function CheckoutPage() {
               onChange={(e) => setAddress(e.target.value)}
               required
               placeholder="123 Main Street"
-              className="bg-[#fcfcf9] border border-stone-200 pl-4 pr-4 py-3 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-inner"
+              className="bg-inset border border-stone-200 pl-4 pr-4 py-3 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-inner"
             />
           </div>
 
@@ -134,7 +145,7 @@ export default function CheckoutPage() {
                 onChange={(e) => setCity(e.target.value)}
                 required
                 placeholder="Mumbai"
-                className="bg-[#fcfcf9] border border-stone-200 pl-4 pr-4 py-3 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-inner"
+                className="bg-inset border border-stone-200 pl-4 pr-4 py-3 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-inner"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -145,7 +156,7 @@ export default function CheckoutPage() {
                 onChange={(e) => setPostalCode(e.target.value)}
                 required
                 placeholder="400001"
-                className="bg-[#fcfcf9] border border-stone-200 pl-4 pr-4 py-3 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-inner"
+                className="bg-inset border border-stone-200 pl-4 pr-4 py-3 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-inner"
               />
             </div>
           </div>
@@ -158,7 +169,7 @@ export default function CheckoutPage() {
               onChange={(e) => setCountry(e.target.value)}
               required
               placeholder="India"
-              className="bg-[#fcfcf9] border border-stone-200 pl-4 pr-4 py-3 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-inner"
+              className="bg-inset border border-stone-200 pl-4 pr-4 py-3 rounded-full text-sm font-medium w-full focus:outline-none focus:ring-2 focus:ring-slate-300 shadow-inner"
             />
           </div>
 
@@ -174,7 +185,7 @@ export default function CheckoutPage() {
 
           <button
             type="submit"
-            disabled={loading || cart.length === 0}
+            disabled={loading || cart.length === 0 || !isBackendOnline}
             className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full text-center shadow-lg transition-transform hover:scale-[1.01] active:scale-99 disabled:opacity-50 mt-2 cursor-pointer"
           >
             {loading ? 'Submitting Order...' : 'Complete Order'}
@@ -183,20 +194,20 @@ export default function CheckoutPage() {
       </div>
 
       {/* Right Summary Area */}
-      <div className="md:w-2/5 bg-stone-50 p-6 rounded-3xl border border-stone-150/40 flex flex-col justify-between gap-6">
+      <div className="md:w-2/5 bg-stone-50 p-6 rounded-3xl border border-zinc-200/60 flex flex-col justify-between gap-6">
         <div>
           <h3 className="text-lg font-black text-slate-900 mb-4">Order Summary</h3>
           <div className="flex flex-col divide-y divide-stone-200/50 max-h-60 overflow-y-auto mb-4">
             {cart.map((item, idx) => (
-              <div key={`${getProductId(item.product)}-${item.color}-${idx}`} className="py-3 flex justify-between items-center gap-3">
+              <div key={`${getProductId(item.product)}-${idx}`} className="py-3 flex justify-between items-center gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <img src={getProductImage(item.product)} className="w-10 h-10 object-contain p-0.5 bg-white border border-stone-200/35 rounded-lg flex-shrink-0" alt="" />
                   <div className="min-w-0">
                     <span className="font-extrabold text-xs text-slate-800 truncate block leading-snug">{item.product.name}</span>
-                    <span className="text-[10px] text-stone-400 capitalize font-bold">Qty: {item.quantity} • {item.color}</span>
+                    <span className="text-[10px] text-stone-400 capitalize font-bold">Qty: {item.quantity}</span>
                   </div>
                 </div>
-                <span className="font-black text-xs text-slate-700 flex-shrink-0">${(item.customPrice || item.product.price) * item.quantity}</span>
+                <span className="font-black text-xs text-slate-700 flex-shrink-0">${item.product.price * item.quantity}</span>
               </div>
             ))}
           </div>

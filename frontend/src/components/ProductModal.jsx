@@ -4,9 +4,7 @@ export default function ProductModal() {
   const {
     activeProductDetail,
     setActiveProductDetail,
-    colorsMap,
     getProductImage,
-    getProductColors,
     addToCart,
     toggleWishlist,
     isProductInWishlist
@@ -14,7 +12,6 @@ export default function ProductModal() {
 
   if (!activeProductDetail) return null
 
-  const selectedColor = activeProductDetail.selectedColor || getProductColors(activeProductDetail)[0]
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-5">
       {/* Overlay */}
@@ -24,9 +21,9 @@ export default function ProductModal() {
       />
 
       {/* Modal Container */}
-      <div className="bg-[#fcfcf9] rounded-[26px] w-[min(720px,calc(100vw-1.25rem))] md:w-[min(740px,calc(100vw-2rem))] border border-stone-200/60 shadow-[0_22px_58px_-30px_rgba(15,23,42,0.5)] relative overflow-y-auto md:overflow-hidden z-10 flex flex-col md:flex-row max-h-[calc(100vh-1rem)] md:max-h-[min(460px,calc(100vh-2rem))]">
+      <div className="bg-surface rounded-[24px] w-[min(720px,calc(100vw-1.25rem))] md:w-[min(740px,calc(100vw-2rem))] border border-stone-200/60 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.34)] relative overflow-y-auto md:overflow-hidden z-10 flex flex-col md:flex-row max-h-[calc(100vh-1rem)] md:max-h-[min(460px,calc(100vh-2rem))]">
         {/* Left Column: Image Area */}
-        <div className="md:w-[44%] bg-[#f5f6f2] p-4 md:p-4.5 flex items-center justify-center border-b md:border-b-0 md:border-r border-stone-200/35">
+        <div className="md:w-[44%] bg-inset p-4 md:p-4.5 flex items-center justify-center border-b md:border-b-0 md:border-r border-zinc-200/60">
           <img 
             src={getProductImage(activeProductDetail)} 
             className="w-full max-w-[280px] max-h-44 md:max-h-[250px] object-contain filter drop-shadow-xl" 
@@ -39,14 +36,14 @@ export default function ProductModal() {
           <div className="flex-1 min-h-0 pr-1 overflow-hidden">
             <div className="flex justify-between items-start gap-4 mb-2">
               <div>
-                <span className="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                <span className="text-[10px] font-extrabold text-slate-700 bg-white border border-stone-200 px-2.5 py-1 rounded-md uppercase tracking-wider">
                   {activeProductDetail.categoryName || activeProductDetail.category}
                 </span>
                 <h2 className="text-[30px] md:text-[34px] font-black text-slate-900 mt-2 leading-[1.02] break-words line-clamp-2">
                   {activeProductDetail.name}
                 </h2>
               </div>
-              <span className="text-lg font-black text-indigo-600">${activeProductDetail.price}</span>
+              <span className="text-lg font-black text-slate-900">${activeProductDetail.price}</span>
             </div>
 
             <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold mb-3">
@@ -78,34 +75,13 @@ export default function ProductModal() {
               {activeProductDetail.description}
             </p>
 
-            {/* Color Selector */}
-            <div className="mb-0.5">
-              <h4 className="text-xs font-bold text-slate-800 mb-2.5 uppercase tracking-wider">Colors available</h4>
-              <div className="flex gap-2.5">
-                {getProductColors(activeProductDetail).map((colorName) => (
-                  <button
-                    key={colorName}
-                    onClick={() => {
-                      setActiveProductDetail(prev => ({...prev, selectedColor: colorName}))
-                    }}
-                    className={`w-7 h-7 rounded-full ${colorsMap[colorName]} transition-all duration-200 cursor-pointer ${
-                      selectedColor === colorName 
-                        ? 'ring-4 scale-110 shadow-xs' 
-                        : 'opacity-85 hover:opacity-100'
-                    }`}
-                    aria-label={`Select color ${colorName}`}
-                  />
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Add to Cart Actions */}
-          <div className="flex gap-2.5 items-center pt-1.5 bg-[#fcfcf9] shrink-0">
+          <div className="flex gap-2.5 items-center pt-1.5 bg-surface shrink-0">
             <button
               onClick={() => addToCart(
-                activeProductDetail, 
-                selectedColor, 
+                activeProductDetail,
                 1
               )}
               disabled={activeProductDetail.countInStock === 0}

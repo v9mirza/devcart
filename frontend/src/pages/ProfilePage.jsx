@@ -175,7 +175,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Details Block */}
-      <div className="flex flex-col sm:flex-row gap-6 items-center bg-stone-50 p-6 rounded-3xl border border-stone-150/40">
+      <div className="flex flex-col sm:flex-row gap-6 items-center bg-stone-50 p-6 rounded-3xl border border-zinc-200/60">
         <img
           src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"
           className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md"
@@ -191,7 +191,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Account Settings */}
-      <div className="bg-stone-50 p-6 rounded-3xl border border-stone-150/40 flex flex-col gap-4">
+      <div className="bg-stone-50 p-6 rounded-3xl border border-zinc-200/60 flex flex-col gap-4">
         <div>
           <h3 className="text-lg font-black text-slate-900">Account Settings</h3>
           <p className="text-xs text-stone-400 font-medium mt-0.5">Update your name, email, or password.</p>
@@ -266,7 +266,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Default Shipping Address Form */}
-      <div className="bg-stone-50 p-6 rounded-3xl border border-stone-150/40 flex flex-col gap-4">
+      <div className="bg-stone-50 p-6 rounded-3xl border border-zinc-200/60 flex flex-col gap-4">
         <div>
           <h3 className="text-lg font-black text-slate-900">Default Shipping Address</h3>
           <p className="text-xs text-stone-400 font-medium mt-0.5">Used to automatically fill your details during checkout.</p>

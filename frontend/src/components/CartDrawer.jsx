@@ -8,14 +8,15 @@ export default function CartDrawer() {
     setIsCartOpen,
     updateCartQuantity,
     removeFromCart,
+    clearCart,
     cartTotalItems,
     cartSubtotal,
     taxAmount,
     shippingCost,
     cartTotal,
-    colorsMap,
     getProductImage,
-    handleCheckout
+    isBackendOnline,
+    cartSyncError
   } = useCart()
 
   if (!isCartOpen) return null
@@ -30,7 +31,7 @@ export default function CartDrawer() {
 
       {/* Slide panel */}
       <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white border-l border-stone-200/50 shadow-2xl flex flex-col justify-between">
+        <div className="w-screen max-w-md bg-surface border-l border-stone-200/50 shadow-[0_18px_44px_-24px_rgba(15,23,42,0.34)] flex flex-col justify-between">
           
           {/* Header */}
           <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between">
@@ -55,7 +56,7 @@ export default function CartDrawer() {
           <div className="flex-1 overflow-y-auto px-6 py-4 divide-y divide-stone-100">
             {cart.length > 0 ? (
               cart.map((item, idx) => (
-                <div key={`${getProductId(item.product)}-${item.color}-${idx}`} className="py-4.5 flex gap-4 items-center">
+                <div key={`${getProductId(item.product)}-${idx}`} className="py-4.5 flex gap-4 items-center">
                   {/* Thumbnail */}
                   <div className="w-16 h-16 bg-stone-100 rounded-xl overflow-hidden flex items-center justify-center p-1.5 flex-shrink-0">
                     <img src={getProductImage(item.product)} className="object-contain w-full h-full" alt="" />
@@ -66,18 +67,14 @@ export default function CartDrawer() {
                     <h4 className="font-extrabold text-sm text-slate-900 truncate leading-snug">
                       {item.product.name}
                     </h4>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`w-3.5 h-3.5 rounded-full ${colorsMap[item.color]}`} />
-                      <span className="text-xs text-stone-400 capitalize font-bold">{item.color}</span>
-                    </div>
-                    <span className="block text-xs font-black text-indigo-600 mt-1.5">${item.customPrice || item.product.price}</span>
+                    <span className="block text-xs font-black text-slate-900 mt-1.5">${item.product.price}</span>
                   </div>
 
                   {/* Quantity Actions */}
                   <div className="flex flex-col items-end gap-2.5">
                     <div className="flex items-center border border-stone-200 rounded-full px-2 py-1 bg-white">
                       <button
-                        onClick={() => updateCartQuantity(getProductId(item.product), item.color, item.quantity - 1, item.customPrice)}
+                        onClick={() => updateCartQuantity(getProductId(item.product), item.quantity - 1)}
                         className="w-5 h-5 rounded-full flex items-center justify-center text-slate-600 hover:bg-stone-100 font-black cursor-pointer text-xs"
                       >
                         -
@@ -86,7 +83,7 @@ export default function CartDrawer() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateCartQuantity(getProductId(item.product), item.color, item.quantity + 1, item.customPrice)}
+                        onClick={() => updateCartQuantity(getProductId(item.product), item.quantity + 1)}
                         className="w-5 h-5 rounded-full flex items-center justify-center text-slate-600 hover:bg-stone-100 font-black cursor-pointer text-xs"
                       >
                         +
@@ -94,7 +91,7 @@ export default function CartDrawer() {
                     </div>
                     
                     <button
-                      onClick={() => removeFromCart(getProductId(item.product), item.color, item.customPrice)}
+                      onClick={() => removeFromCart(getProductId(item.product))}
                       className="text-xs text-stone-400 hover:text-red-500 font-bold transition-colors cursor-pointer"
                     >
                       Remove
@@ -113,7 +110,7 @@ export default function CartDrawer() {
 
           {/* Drawer footer summary */}
           {cart.length > 0 && (
-            <div className="px-6 py-6 bg-stone-50 border-t border-stone-100 flex flex-col gap-3">
+            <div className="px-6 py-6 bg-inset border-t border-zinc-200 flex flex-col gap-3">
               <div className="flex flex-col gap-2 text-sm font-bold text-stone-500">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
@@ -131,24 +128,44 @@ export default function CartDrawer() {
                 </div>
                 <div className="flex justify-between text-base text-slate-900 font-black border-t border-stone-200/60 pt-3">
                   <span>Total Amount</span>
-                  <span className="text-indigo-600">${cartTotal}</span>
+                  <span className="text-slate-900">${cartTotal}</span>
                 </div>
               </div>
 
               <div className="flex flex-col gap-2 mt-2">
-                <Link
-                  to="/checkout"
-                  onClick={() => setIsCartOpen(false)}
-                  className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3 rounded-full text-center shadow-lg transition-transform duration-200 hover:scale-[1.01] active:scale-99"
-                >
-                  Proceed to Checkout
-                </Link>
+                {isBackendOnline ? (
+                  <Link
+                    to="/checkout"
+                    onClick={() => setIsCartOpen(false)}
+                    className="w-full bg-slate-950 hover:bg-slate-800 text-white font-bold py-3 rounded-full text-center shadow-lg transition-transform duration-200 hover:scale-[1.01] active:scale-99"
+                  >
+                    Proceed to Checkout
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full bg-stone-300 text-stone-600 font-bold py-3 rounded-full text-center cursor-not-allowed"
+                  >
+                    Checkout Unavailable (Server Offline)
+                  </button>
+                )}
                 <button
-                  onClick={handleCheckout}
+                  onClick={clearCart}
                   className="w-full border border-stone-200 bg-white hover:bg-stone-50 text-slate-700 font-bold py-2 rounded-full text-center text-xs transition-colors cursor-pointer"
                 >
-                  Instant MVP Checkout
+                  Clear Cart
                 </button>
+                {!isBackendOnline && (
+                  <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 font-semibold">
+                    Server offline. Cart changes and checkout are temporarily disabled.
+                  </p>
+                )}
+                {cartSyncError && (
+                  <p className="text-[11px] text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2 font-semibold">
+                    {cartSyncError}
+                  </p>
+                )}
               </div>
             </div>
           )}

@@ -1,6 +1,16 @@
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const mongoose = require("mongoose");
+const { calculatePricing } = require("../utils/pricing");
+
+const formatCartResponse = (userId, cart) => {
+  const items = cart?.items || [];
+  return {
+    user: userId,
+    items,
+    summary: calculatePricing(items),
+  };
+};
 
 // @desc    Get logged-in user's cart
 // @route   GET /api/cart
@@ -8,10 +18,7 @@ const mongoose = require("mongoose");
 exports.getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: req.user._id });
-    if (!cart) {
-      return res.json({ user: req.user._id, items: [] });
-    }
-    res.json(cart);
+    res.json(formatCartResponse(req.user._id, cart));
   } catch {
     res.status(500).json({ message: "Server error" });
   }
@@ -60,7 +67,7 @@ exports.addToCart = async (req, res) => {
     }
 
     await cart.save();
-    res.status(201).json(cart);
+    res.status(201).json(formatCartResponse(req.user._id, cart));
   } catch {
     res.status(500).json({ message: "Server error" });
   }
@@ -98,7 +105,7 @@ exports.updateCartItem = async (req, res) => {
 
     item.qty = qty;
     await cart.save();
-    res.json(cart);
+    res.json(formatCartResponse(req.user._id, cart));
   } catch {
     res.status(500).json({ message: "Server error" });
   }
@@ -130,7 +137,7 @@ exports.removeCartItem = async (req, res) => {
     }
 
     await cart.save();
-    res.json(cart);
+    res.json(formatCartResponse(req.user._id, cart));
   } catch {
     res.status(500).json({ message: "Server error" });
   }
@@ -143,12 +150,12 @@ exports.clearCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
-      return res.json({ message: "Cart is already empty" });
+      return res.json(formatCartResponse(req.user._id, { items: [] }));
     }
 
     cart.items = [];
     await cart.save();
-    res.json({ message: "Cart cleared" });
+    res.json(formatCartResponse(req.user._id, cart));
   } catch {
     res.status(500).json({ message: "Server error" });
   }

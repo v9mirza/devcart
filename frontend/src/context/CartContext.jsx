@@ -82,6 +82,8 @@ export function CartProvider({ children }) {
   const [categoriesList, setCategoriesList] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isBackendOnline, setIsBackendOnline] = useState(true)
+  const [cartSyncError, setCartSyncError] = useState(null)
 
   // Auth state
   const [user, setUser] = useState(() => {
@@ -103,10 +105,15 @@ export function CartProvider({ children }) {
   const [activeProductDetail, setActiveProductDetail] = useState(null)
   
   // Spotlight options
-  const [spotlightColor, setSpotlightColor] = useState('blue')
   const [likes, setLikes] = useState(460)
   const [hasLiked, setHasLiked] = useState(false)
   const [showCheckoutSuccess, setShowCheckoutSuccess] = useState(false)
+  const [cartPricing, setCartPricing] = useState({
+    itemsPrice: 0,
+    taxPrice: 0,
+    shippingPrice: 0,
+    totalPrice: 0
+  })
   const catalogRef = useRef(null)
 
   const scrollToCatalog = () => {
@@ -138,6 +145,7 @@ export function CartProvider({ children }) {
         setProducts(prodData.data || [])
         setCategoriesList(catData || [])
         setError(null)
+        setIsBackendOnline(true)
       } catch (err) {
         console.warn('Backend server offline. Falling back to offline fallback data.', err)
         setProducts(OFFLINE_PRODUCTS)
@@ -147,6 +155,8 @@ export function CartProvider({ children }) {
           { _id: 'VR & Tech', name: 'VR & Tech' },
           { _id: 'Accessories', name: 'Accessories' }
         ])
+        setIsBackendOnline(false)
+        setError('Server offline. Browse is available, but checkout is disabled.')
       } finally {
         setLoading(false)
       }
@@ -281,18 +291,26 @@ export function CartProvider({ children }) {
             }
             return {
               product: fullProduct,
-              color: 'black',
-              quantity: item.qty,
-              customPrice: null
+              quantity: item.qty
             }
           })
           setCart(mappedItems)
+          setCartPricing({
+            itemsPrice: dbCart.summary?.itemsPrice || 0,
+            taxPrice: dbCart.summary?.taxPrice || 0,
+            shippingPrice: dbCart.summary?.shippingPrice || 0,
+            totalPrice: dbCart.summary?.totalPrice || 0
+          })
+          setCartSyncError(null)
+          setIsBackendOnline(true)
         }
       } else if (res.status === 401) {
         logout()
       }
     } catch (err) {
       console.warn('Failed to fetch DB cart, offline fallback mode active.', err)
+      setIsBackendOnline(false)
+      setCartSyncError('Could not sync cart with server. Please try again when backend is online.')
     }
   }
 
@@ -374,13 +392,12 @@ export function CartProvider({ children }) {
   }, [products, user])
 
   // Cart operations
-  const addToCart = (product, color, quantity = 1, customPrice = null) => {
+  const addToCart = async (product, quantity = 1) => {
+    const previousCart = cart
+    const previousPricing = cartPricing
     setCart((prevCart) => {
-      const targetPrice = customPrice !== null ? customPrice : product.price
       const existingItemIndex = prevCart.findIndex(
-        (item) => getProductId(item.product) === getProductId(product) && 
-                  item.color === color && 
-                  (item.customPrice || item.product.price) === targetPrice
+        (item) => getProductId(item.product) === getProductId(product)
       )
 
       if (existingItemIndex > -1) {
@@ -388,7 +405,7 @@ export function CartProvider({ children }) {
         newCart[existingItemIndex].quantity += quantity
         return newCart
       } else {
-        return [...prevCart, { product, color, quantity, customPrice }]
+        return [...prevCart, { product, quantity }]
       }
     })
     setIsCartOpen(true)
@@ -397,25 +414,51 @@ export function CartProvider({ children }) {
     // Sync to backend DB
     const token = localStorage.getItem('devcart_token')
     if (token && user) {
-      fetch('http://localhost:5000/api/cart', {
+      try {
+        const res = await fetch('http://localhost:5000/api/cart', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ productId: getProductId(product), qty: quantity })
-      }).catch(err => console.error('Failed to sync addToCart', err))
+      })
+        if (res.ok) {
+          const data = await res.json()
+          await fetchDbCart()
+          setCartPricing({
+            itemsPrice: data.summary?.itemsPrice || 0,
+            taxPrice: data.summary?.taxPrice || 0,
+            shippingPrice: data.summary?.shippingPrice || 0,
+            totalPrice: data.summary?.totalPrice || 0
+          })
+          setCartSyncError(null)
+          setIsBackendOnline(true)
+        } else if (res.status === 401) {
+          logout()
+        } else {
+          throw new Error('Cart sync failed')
+        }
+      } catch (err) {
+        console.error('Failed to sync addToCart', err)
+        setCart(previousCart)
+        setCartPricing(previousPricing)
+        setCartSyncError('Could not sync cart with server. Your last change was not saved.')
+        setIsBackendOnline(false)
+      }
     }
   }
 
-  const updateCartQuantity = (productId, color, newQuantity, customPrice) => {
+  const updateCartQuantity = async (productId, newQuantity) => {
     if (newQuantity <= 0) {
-      removeFromCart(productId, color, customPrice)
+      removeFromCart(productId)
       return
     }
+    const previousCart = cart
+    const previousPricing = cartPricing
     setCart((prevCart) =>
       prevCart.map((item) =>
-        getProductId(item.product) === productId && item.color === color && item.customPrice === customPrice
+        getProductId(item.product) === productId
           ? { ...item, quantity: newQuantity }
           : item
       )
@@ -424,31 +467,122 @@ export function CartProvider({ children }) {
     // Sync to backend DB
     const token = localStorage.getItem('devcart_token')
     if (token && user) {
-      fetch(`http://localhost:5000/api/cart/${productId}`, {
+      try {
+        const res = await fetch(`http://localhost:5000/api/cart/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ qty: newQuantity })
-      }).catch(err => console.error('Failed to sync updateCartQuantity', err))
+      })
+        if (res.ok) {
+          const data = await res.json()
+          await fetchDbCart()
+          setCartPricing({
+            itemsPrice: data.summary?.itemsPrice || 0,
+            taxPrice: data.summary?.taxPrice || 0,
+            shippingPrice: data.summary?.shippingPrice || 0,
+            totalPrice: data.summary?.totalPrice || 0
+          })
+          setCartSyncError(null)
+          setIsBackendOnline(true)
+        } else if (res.status === 401) {
+          logout()
+        } else {
+          throw new Error('Cart sync failed')
+        }
+      } catch (err) {
+        console.error('Failed to sync updateCartQuantity', err)
+        setCart(previousCart)
+        setCartPricing(previousPricing)
+        setCartSyncError('Could not sync cart with server. Your last change was not saved.')
+        setIsBackendOnline(false)
+      }
     }
   }
 
-  const removeFromCart = (productId, color, customPrice) => {
+  const removeFromCart = async (productId) => {
+    const previousCart = cart
+    const previousPricing = cartPricing
     setCart((prevCart) =>
-      prevCart.filter((item) => !(getProductId(item.product) === productId && item.color === color && item.customPrice === customPrice))
+      prevCart.filter((item) => getProductId(item.product) !== productId)
     )
 
     // Sync to backend DB
     const token = localStorage.getItem('devcart_token')
     if (token && user) {
-      fetch(`http://localhost:5000/api/cart/${productId}`, {
+      try {
+        const res = await fetch(`http://localhost:5000/api/cart/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
-      }).catch(err => console.error('Failed to sync removeFromCart', err))
+      })
+        if (res.ok) {
+          const data = await res.json()
+          await fetchDbCart()
+          setCartPricing({
+            itemsPrice: data.summary?.itemsPrice || 0,
+            taxPrice: data.summary?.taxPrice || 0,
+            shippingPrice: data.summary?.shippingPrice || 0,
+            totalPrice: data.summary?.totalPrice || 0
+          })
+          setCartSyncError(null)
+          setIsBackendOnline(true)
+        } else if (res.status === 401) {
+          logout()
+        } else {
+          throw new Error('Cart sync failed')
+        }
+      } catch (err) {
+        console.error('Failed to sync removeFromCart', err)
+        setCart(previousCart)
+        setCartPricing(previousPricing)
+        setCartSyncError('Could not sync cart with server. Your last change was not saved.')
+        setIsBackendOnline(false)
+      }
+    }
+  }
+
+  const clearCart = async () => {
+    const previousCart = cart
+    const previousPricing = cartPricing
+    setCart([])
+    const token = localStorage.getItem('devcart_token')
+    if (!token || !user) {
+      setCartPricing({ itemsPrice: 0, taxPrice: 0, shippingPrice: 0, totalPrice: 0 })
+      return
+    }
+    try {
+      const res = await fetch('http://localhost:5000/api/cart', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        await fetchDbCart()
+        setCartPricing({
+          itemsPrice: data.summary?.itemsPrice || 0,
+          taxPrice: data.summary?.taxPrice || 0,
+          shippingPrice: data.summary?.shippingPrice || 0,
+          totalPrice: data.summary?.totalPrice || 0
+        })
+        setCartSyncError(null)
+        setIsBackendOnline(true)
+      } else if (res.status === 401) {
+        logout()
+      } else {
+        throw new Error('Cart clear failed')
+      }
+    } catch (err) {
+      console.error('Failed to clear cart', err)
+      setCart(previousCart)
+      setCartPricing(previousPricing)
+      setCartSyncError('Could not sync cart with server. Please try again when backend is online.')
+      setIsBackendOnline(false)
     }
   }
 
@@ -457,16 +591,26 @@ export function CartProvider({ children }) {
   }, [cart])
 
   const cartSubtotal = useMemo(() => {
-    return cart.reduce((total, item) => total + (item.customPrice || item.product.price) * item.quantity, 0)
-  }, [cart])
+    return cartPricing.itemsPrice
+  }, [cartPricing.itemsPrice])
 
-  const taxAmount = useMemo(() => Math.round(cartSubtotal * 0.08), [cartSubtotal])
-  const shippingCost = cartSubtotal > 350 ? 0 : cartSubtotal > 0 ? 15 : 0
-  const cartTotal = cartSubtotal + taxAmount + shippingCost
+  const taxAmount = useMemo(() => cartPricing.taxPrice, [cartPricing.taxPrice])
+  const shippingCost = useMemo(() => cartPricing.shippingPrice, [cartPricing.shippingPrice])
+  const cartTotal = useMemo(() => cartPricing.totalPrice, [cartPricing.totalPrice])
 
-  const handleCheckout = () => {
+  const handleCheckout = (createdOrder = null) => {
     setShowCheckoutSuccess(true)
     setCart([])
+    if (createdOrder) {
+      setCartPricing({
+        itemsPrice: createdOrder.itemsPrice || 0,
+        taxPrice: createdOrder.taxPrice || 0,
+        shippingPrice: createdOrder.shippingPrice || 0,
+        totalPrice: createdOrder.totalPrice || 0
+      })
+    } else {
+      setCartPricing({ itemsPrice: 0, taxPrice: 0, shippingPrice: 0, totalPrice: 0 })
+    }
   }
 
   const toggleLike = () => {
@@ -507,6 +651,7 @@ export function CartProvider({ children }) {
     localStorage.removeItem('devcart_user')
     setUser(null)
     setCart([])
+    setCartPricing({ itemsPrice: 0, taxPrice: 0, shippingPrice: 0, totalPrice: 0 })
     setWishlist([])
   }
 
@@ -558,6 +703,8 @@ export function CartProvider({ children }) {
         categoriesList,
         loading,
         error,
+        isBackendOnline,
+        cartSyncError,
         cart,
         user,
         login,
@@ -580,8 +727,6 @@ export function CartProvider({ children }) {
         activeProductDetail,
         setActiveProductDetail,
         openProductDetail,
-        spotlightColor,
-        setSpotlightColor,
         likes,
         hasLiked,
         showCheckoutSuccess,
@@ -598,6 +743,7 @@ export function CartProvider({ children }) {
         addToCart,
         updateCartQuantity,
         removeFromCart,
+        clearCart,
         cartTotalItems,
         cartSubtotal,
         taxAmount,
