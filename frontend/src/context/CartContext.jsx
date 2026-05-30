@@ -680,22 +680,25 @@ export function CartProvider({ children }) {
   const shippingCost = computedCartPricing.shippingPrice
   const cartTotal = computedCartPricing.totalPrice
 
-  const handleCheckout = (createdOrder = null, options = {}) => {
+  const handleCheckout = async (createdOrder = null, options = {}) => {
     const isDemo = options.demo === true || !createdOrder
     setCheckoutSuccessMode(isDemo ? 'demo' : 'order')
     setLastOrderId(createdOrder?._id ?? null)
     setShowCheckoutSuccess(true)
-    setCart([])
-    if (createdOrder) {
-      setCartPricing({
-        itemsPrice: createdOrder.itemsPrice || 0,
-        taxPrice: createdOrder.taxPrice || 0,
-        shippingPrice: createdOrder.shippingPrice || 0,
-        totalPrice: createdOrder.totalPrice || 0
-      })
-    } else {
-      setCartPricing({ itemsPrice: 0, taxPrice: 0, shippingPrice: 0, totalPrice: 0 })
+
+    if (isDemo) {
+      // Clear server cart too — otherwise fetchDbCart on next addToCart restores old items
+      await clearCart()
+      return
     }
+
+    setCart([])
+    setCartPricing({
+      itemsPrice: createdOrder.itemsPrice || 0,
+      taxPrice: createdOrder.taxPrice || 0,
+      shippingPrice: createdOrder.shippingPrice || 0,
+      totalPrice: createdOrder.totalPrice || 0
+    })
   }
 
   const toggleLike = () => {

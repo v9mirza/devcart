@@ -29,9 +29,9 @@ export default function CartDrawer() {
     setIsCartOpen(false)
   }
 
-  const handleDemoCheckout = () => {
-    handleCheckout(null, { demo: true })
+  const handleDemoCheckout = async () => {
     setIsCartOpen(false)
+    await handleCheckout(null, { demo: true })
   }
 
   return (
