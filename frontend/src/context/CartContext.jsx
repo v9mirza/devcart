@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useMemo, useEffect, useRef } from 'react'
 import { calculateCartPricing } from '../utils/pricing'
+import { productMatchesSearch } from '../utils/productSearch'
 import vrHeadset from '../assets/vr_headset.png'
 import blueHeadphones from '../assets/blue_headphones.png'
 import wirelessEarbuds from '../assets/wireless_earbuds.png'
@@ -209,9 +210,7 @@ export function CartProvider({ children }) {
     return products.filter((p) => {
       const catName = categoryIdToNameMap[p.category] || p.category
       const matchesCategory = selectedCategory === 'All' || catName === selectedCategory
-      const matchesSearch = 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSearch = productMatchesSearch(p, searchQuery, catName)
       return matchesCategory && matchesSearch
     })
   }, [products, selectedCategory, searchQuery, categoryIdToNameMap])

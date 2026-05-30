@@ -46,7 +46,7 @@ export default function StickyStoreHeader() {
       >
         <div
           className={`mx-auto w-full max-w-[1280px] px-3 sm:px-4 md:px-6 transition-[padding] duration-200 ${
-            pinned ? 'py-2 sm:py-2.5' : 'py-3 sm:py-4'
+            pinned ? 'py-2.5 sm:py-2.5 md:py-2' : 'py-3.5 sm:py-4 md:py-4'
           }`}
         >
           <Header compact={pinned} />

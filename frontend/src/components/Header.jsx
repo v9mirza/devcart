@@ -1,36 +1,128 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCart } from '../context/CartContext'
+import { getProductId, useCart } from '../context/CartContext'
+import { productMatchesSearch, productSearchRank } from '../utils/productSearch'
+import ProductImage from './ProductImage'
 import UserAvatar from './UserAvatar'
 
-function SearchField({ compact = false, searchQuery, setSearchQuery }) {
+const SUGGESTION_LIMIT = 5
+
+function SearchField({
+  variant = 'default',
+  compact = false,
+  searchQuery,
+  setSearchQuery,
+  products,
+  loading,
+  categoryIdToNameMap,
+  getProductImage,
+  setActiveProductDetail,
+  scrollToCatalog
+}) {
+  const isMobile = variant === 'mobile'
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef(null)
+
+  const matchingProducts = useMemo(() => {
+    const query = searchQuery.trim()
+    if (!query) return []
+
+    return products
+      .filter((product) => {
+        const categoryName = categoryIdToNameMap[product.category] || product.category
+        return productMatchesSearch(product, query, categoryName)
+      })
+      .sort((a, b) => {
+        const catA = categoryIdToNameMap[a.category] || a.category
+        const catB = categoryIdToNameMap[b.category] || b.category
+        return (
+          productSearchRank(a, query, catA) - productSearchRank(b, query, catB) ||
+          String(a.name || '').localeCompare(String(b.name || ''))
+        )
+      })
+  }, [products, searchQuery, categoryIdToNameMap])
+
+  const suggestions = matchingProducts.slice(0, SUGGESTION_LIMIT)
+  const showDropdown = isOpen && searchQuery.trim().length > 0 && !loading
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => document.removeEventListener('mousedown', handlePointerDown)
+  }, [])
+
+  const handleClear = () => {
+    setSearchQuery('')
+    setIsOpen(false)
+  }
+
+  const handleSelectProduct = (product) => {
+    setActiveProductDetail(product)
+    setIsOpen(false)
+  }
+
+  const handleViewAll = () => {
+    scrollToCatalog()
+    setIsOpen(false)
+  }
+
   return (
-    <div className="relative w-full min-w-0">
+    <div ref={containerRef} className="relative w-full min-w-0">
       <input
-        type="search"
+        type="text"
+        inputMode="search"
+        enterKeyHint="search"
+        autoComplete="off"
+        spellCheck={false}
         placeholder="Search products..."
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className={`form-input rounded-full w-full shadow-sm ${
-          compact
-            ? 'py-2 pl-4 pr-11 text-sm'
-            : 'py-2.5 pl-5 pr-24 text-base md:text-sm'
-        }`}
+        onChange={(e) => {
+          setSearchQuery(e.target.value)
+          setIsOpen(true)
+        }}
+        onFocus={() => setIsOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setIsOpen(false)
+          if (e.key === 'Enter' && searchQuery.trim()) handleViewAll()
+        }}
+        role="combobox"
+        aria-expanded={showDropdown}
+        aria-controls="search-suggestions"
+        aria-autocomplete="list"
+        className={
+          isMobile
+            ? `w-full rounded-full border bg-white font-medium text-slate-800 shadow-[0_2px_14px_-6px_rgba(13,148,136,0.14)] transition-all placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-accent ${
+                compact
+                  ? 'py-2.5 pl-4 pr-12 text-sm border-teal-200/70'
+                  : 'py-3 pl-4 pr-12 text-[15px] border-teal-200/90'
+              }`
+            : `form-input rounded-full w-full shadow-sm ${
+                compact
+                  ? 'py-2 pl-4 pr-11 text-sm'
+                  : 'py-2.5 pl-5 pr-24 text-base md:text-sm'
+              }`
+        }
       />
-      {searchQuery && !compact && (
+      {searchQuery && !isMobile && !compact && (
         <button
           type="button"
-          onClick={() => setSearchQuery('')}
+          onClick={handleClear}
           className="absolute right-12 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 text-xs font-bold cursor-pointer"
           aria-label="Clear search"
         >
           Clear
         </button>
       )}
-      {searchQuery && compact && (
+      {searchQuery && (isMobile || compact) && (
         <button
           type="button"
-          onClick={() => setSearchQuery('')}
-          className="absolute right-11 top-1/2 -translate-y-1/2 w-6 h-6 text-stone-400 hover:text-stone-600 flex items-center justify-center cursor-pointer"
+          onClick={handleClear}
+          className="absolute right-11 top-1/2 -translate-y-1/2 w-7 h-7 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full flex items-center justify-center cursor-pointer transition-colors"
           aria-label="Clear search"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,8 +132,15 @@ function SearchField({ compact = false, searchQuery, setSearchQuery }) {
       )}
       <button
         type="button"
-        className={`absolute right-1 top-1/2 -translate-y-1/2 bg-accent text-accent-foreground rounded-full flex items-center justify-center cursor-pointer hover:bg-accent-hover transition-colors ${
-          compact ? 'w-8 h-8' : 'w-9 h-9'
+        onClick={() => {
+          if (searchQuery.trim()) handleViewAll()
+        }}
+        className={`absolute right-1 top-1/2 -translate-y-1/2 bg-accent text-accent-foreground rounded-full flex items-center justify-center cursor-pointer hover:bg-accent-hover transition-all active:scale-95 ${
+          isMobile
+            ? 'w-9 h-9 shadow-sm shadow-teal-900/15'
+            : compact
+              ? 'w-8 h-8'
+              : 'w-9 h-9'
         }`}
         aria-label="Search"
       >
@@ -49,6 +148,66 @@ function SearchField({ compact = false, searchQuery, setSearchQuery }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </button>
+
+      {showDropdown && (
+        <div
+          id="search-suggestions"
+          role="listbox"
+          className={`absolute left-0 right-0 top-[calc(100%+0.5rem)] z-[60] overflow-hidden border border-zinc-200/90 bg-white ${
+            isMobile
+              ? 'rounded-2xl shadow-[0_20px_48px_-16px_rgba(15,23,42,0.22)]'
+              : 'rounded-[18px] shadow-[0_16px_40px_-16px_rgba(15,23,42,0.28)]'
+          }`}
+        >
+          {suggestions.length > 0 ? (
+            <ul className="max-h-[min(20rem,60vh)] overflow-y-auto py-1.5">
+              {suggestions.map((product) => (
+                <li key={getProductId(product)}>
+                  <button
+                    type="button"
+                    role="option"
+                    onClick={() => handleSelectProduct(product)}
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-surface-hover transition-colors cursor-pointer"
+                  >
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-200/70 bg-surface p-1.5">
+                      <ProductImage
+                        product={product}
+                        getProductImage={getProductImage}
+                        className="h-full w-full object-contain"
+                      />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold text-slate-900">{product.name}</span>
+                      <span className="block truncate text-[11px] font-semibold text-stone-500">
+                        {categoryIdToNameMap[product.category] || product.category}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-sm font-black text-slate-900">${product.price}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="px-4 py-5 text-center">
+              <p className="text-sm font-bold text-slate-800">No products found</p>
+              <p className="mt-1 text-xs text-stone-500">Try a different search term.</p>
+            </div>
+          )}
+
+          {matchingProducts.length > 0 && (
+            <button
+              type="button"
+              onClick={handleViewAll}
+              className="flex w-full items-center justify-center gap-1 border-t border-stone-100 bg-inset px-4 py-3 text-xs font-bold text-accent hover:bg-surface-hover transition-colors cursor-pointer"
+            >
+              View all {matchingProducts.length} result{matchingProducts.length === 1 ? '' : 's'}
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -57,6 +216,12 @@ export default function Header({ compact = false }) {
   const {
     searchQuery,
     setSearchQuery,
+    products,
+    loading,
+    categoryIdToNameMap,
+    getProductImage,
+    setActiveProductDetail,
+    scrollToCatalog,
     setIsCartOpen,
     cartTotalItems,
     cartBadgePulse,
@@ -65,16 +230,29 @@ export default function Header({ compact = false }) {
     user
   } = useCart()
 
+  const searchFieldProps = {
+    searchQuery,
+    setSearchQuery,
+    products,
+    loading,
+    categoryIdToNameMap,
+    getProductImage,
+    setActiveProductDetail,
+    scrollToCatalog
+  }
+
   const iconSize = compact ? 'w-9 h-9' : 'w-10 h-10'
   const badgeRing = compact ? 'ring-1 ring-white' : 'ring-2 ring-white'
+  const iconBtnClass =
+    'rounded-full flex items-center justify-center text-slate-700 border border-zinc-200/90 bg-white hover:bg-surface-hover hover:border-teal-200/60 active:scale-95 transition-all shadow-[0_1px_4px_rgba(15,23,42,0.06)] relative cursor-pointer'
 
-  const iconButtons = (
-    <div className={`flex items-center shrink-0 ${compact ? 'gap-1' : 'gap-2'}`}>
+  const iconButtons = (mobile = false) => (
+    <div className={`flex items-center shrink-0 ${mobile ? 'gap-1.5' : compact ? 'gap-1' : 'gap-2'}`}>
       <button
         type="button"
         data-cart-target
         onClick={() => setIsCartOpen(true)}
-        className={`${iconSize} bg-inset border border-zinc-200 rounded-full flex items-center justify-center text-slate-800 hover:bg-surface-hover active:scale-95 transition-all shadow-sm relative cursor-pointer ${
+        className={`${iconSize} ${iconBtnClass} ${
           cartBadgePulse ? 'animate-cart-icon-bounce' : ''
         }`}
         aria-label="Open cart"
@@ -95,10 +273,10 @@ export default function Header({ compact = false }) {
 
       <button
         onClick={() => setIsWishlistOpen(true)}
-        className={`${iconSize} rounded-full flex items-center justify-center border transition-all shadow-sm active:scale-95 cursor-pointer relative ${
+        className={`${iconSize} rounded-full flex items-center justify-center border transition-all active:scale-95 cursor-pointer relative shadow-[0_1px_4px_rgba(15,23,42,0.06)] ${
           wishlist.length > 0
-            ? 'bg-rose-50 border-rose-200 text-rose-500'
-            : 'bg-inset border-zinc-200 text-slate-800 hover:bg-surface-hover'
+            ? 'bg-rose-50 border-rose-200 text-rose-500 hover:bg-rose-100/80'
+            : iconBtnClass
         }`}
         aria-label="Open wishlist"
       >
@@ -129,7 +307,7 @@ export default function Header({ compact = false }) {
       ) : (
         <Link
           to="/login"
-          className={`shrink-0 inline-flex items-center justify-center font-bold text-accent-foreground bg-accent hover:bg-accent-hover rounded-full shadow-sm transition-all active:scale-[0.98] ${
+          className={`shrink-0 inline-flex items-center justify-center font-bold text-accent-foreground bg-accent hover:bg-accent-hover rounded-full shadow-[0_2px_10px_-4px_rgba(13,148,136,0.45)] transition-all active:scale-[0.98] ${
             compact ? 'h-9 px-3.5 text-xs' : 'h-10 px-4 text-sm'
           }`}
         >
@@ -139,11 +317,17 @@ export default function Header({ compact = false }) {
     </div>
   )
 
-  const logoMark = (showWordmark = true) => (
-    <Link to="/" className="flex items-center gap-1.5 text-slate-900 hover:opacity-90 shrink-0 min-w-0">
+  const logoMark = (showWordmark = true, mobile = false) => (
+    <Link to="/" className="flex items-center gap-2 text-slate-900 hover:opacity-90 shrink-0 min-w-0 group">
       <span
-        className={`bg-accent text-accent-foreground rounded-lg flex items-center justify-center font-serif font-black shrink-0 ${
-          compact ? 'w-8 h-8 text-base' : 'w-7 h-7 text-lg'
+        className={`bg-accent text-accent-foreground rounded-[10px] flex items-center justify-center font-serif font-black shrink-0 shadow-[0_2px_8px_-2px_rgba(13,148,136,0.35)] transition-transform group-active:scale-95 ${
+          mobile
+            ? compact
+              ? 'w-8 h-8 text-base'
+              : 'w-9 h-9 text-lg'
+            : compact
+              ? 'w-8 h-8 text-base'
+              : 'w-7 h-7 text-lg'
         }`}
       >
         d
@@ -151,7 +335,13 @@ export default function Header({ compact = false }) {
       {showWordmark && (
         <span
           className={`font-extrabold tracking-tighter truncate ${
-            compact ? 'text-sm sm:text-base' : 'text-xl'
+            mobile
+              ? compact
+                ? 'text-base'
+                : 'text-xl'
+              : compact
+                ? 'text-sm sm:text-base'
+                : 'text-xl'
           }`}
         >
           devcart.
@@ -162,32 +352,23 @@ export default function Header({ compact = false }) {
 
   return (
     <header className="w-full">
-      {/* Mobile: compact single row when sticky/pinned */}
-      <div className={`md:hidden ${compact ? 'flex items-center gap-2' : 'flex flex-col gap-2.5'}`}>
-        {compact ? (
-          <>
-            {logoMark(true)}
-            <SearchField compact searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-            {iconButtons}
-          </>
-        ) : (
-          <>
-            <div className="flex items-center justify-between gap-2 min-w-0">
-              {logoMark(true)}
-              {iconButtons}
-            </div>
-            <SearchField searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-          </>
-        )}
+      {/* Mobile: logo + actions on top, full-width search below */}
+      <div className={`md:hidden flex flex-col ${compact ? 'gap-2.5' : 'gap-3'}`}>
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          {logoMark(true, true)}
+          {iconButtons(true)}
+        </div>
+        <div className="h-px bg-gradient-to-r from-transparent via-zinc-200/70 to-transparent" aria-hidden />
+        <SearchField variant="mobile" compact={compact} {...searchFieldProps} />
       </div>
 
       {/* Desktop */}
       <div className="hidden md:grid md:grid-cols-[auto_1fr_auto] gap-4 items-center">
         {logoMark(true)}
         <div className="relative w-full max-w-xl justify-self-center">
-          <SearchField searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <SearchField {...searchFieldProps} />
         </div>
-        {iconButtons}
+        {iconButtons()}
       </div>
     </header>
   )
