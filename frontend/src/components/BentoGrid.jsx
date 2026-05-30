@@ -57,10 +57,8 @@ export default function BentoGrid() {
     (p.name || '').toLowerCase().includes('ergonomic vertical mouse')
   )
 
-  // Match the reference: the dark card uses the VR image, but the visible title/copy is the Surface headphone.
-  const darkFeaturedImageProduct = vrFeaturedProduct || surfaceHeadphoneProduct
-  const darkFeaturedTitleProduct = surfaceHeadphoneProduct || vrFeaturedProduct
-  const darkFeaturedTagline = 'Boosted with bass'
+  const darkFeaturedProduct = vrFeaturedProduct || surfaceHeadphoneProduct
+  const darkFeaturedTagline = 'product'
 
   const editorsPick = useMemo(() => {
     const skip = new Set(
@@ -377,20 +375,20 @@ export default function BentoGrid() {
         )}
 
         {/* Featured VR / surface card — full-bleed image like reference */}
-        {darkFeaturedImageProduct && darkFeaturedTitleProduct && (
+        {darkFeaturedProduct && (
           <div
-            onClick={() => setActiveProductDetail(darkFeaturedTitleProduct)}
+            onClick={() => setActiveProductDetail(darkFeaturedProduct)}
             className="col-span-2 lg:col-span-1 rounded-[18px] sm:rounded-[22px] overflow-hidden border border-zinc-200/60 shadow-sm relative group hover:shadow-lg transition-all duration-300 cursor-pointer min-h-[200px] sm:min-h-[240px] lg:min-h-[280px] lg:flex-1"
           >
             <ProductThumb
-              product={darkFeaturedImageProduct}
+              product={darkFeaturedProduct}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent" />
 
             <div className="absolute top-4 right-4 z-20">
               <button
-                onClick={(e) => { e.stopPropagation(); setActiveProductDetail(darkFeaturedTitleProduct) }}
+                onClick={(e) => { e.stopPropagation(); setActiveProductDetail(darkFeaturedProduct) }}
                 className="w-7 h-7 bg-white/15 backdrop-blur-sm group-hover:bg-white/25 text-white rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
                 aria-label="Open product"
               >
@@ -400,7 +398,7 @@ export default function BentoGrid() {
 
             <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
               <h2 className="text-sm font-extrabold text-white leading-snug">
-                {darkFeaturedTitleProduct.name}
+                {darkFeaturedProduct.name}
               </h2>
               <p className="text-[10px] text-stone-300 font-semibold mt-0.5">{darkFeaturedTagline}</p>
             </div>
