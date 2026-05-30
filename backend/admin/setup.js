@@ -1,14 +1,14 @@
 const { MongoStore } = require("connect-mongo");
 
-const User = require("../models/User");
-const Category = require("../models/Category");
-const Product = require("../models/Product");
-const Order = require("../models/Order");
-const Cart = require("../models/Cart");
-const Wishlist = require("../models/Wishlist");
+const dashboardHandler = require("./dashboard");
+const categoryResource = require("./resources/category");
+const productResource = require("./resources/product");
+const orderResource = require("./resources/order");
+const userResource = require("./resources/user");
+const cartResource = require("./resources/cart");
+const wishlistResource = require("./resources/wishlist");
 
 const setupAdmin = async (app) => {
-  // Use dynamic imports since AdminJS packages are ESM only
   const { default: AdminJS } = await import("adminjs");
   const AdminJSExpress = await import("@adminjs/express");
   const AdminJSMongoose = await import("@adminjs/mongoose");
@@ -19,18 +19,35 @@ const setupAdmin = async (app) => {
   });
 
   const admin = new AdminJS({
+    dashboard: { handler: dashboardHandler },
     resources: [
-      { resource: User, options: { navigation: "Users" } },
-      { resource: Category, options: { navigation: "Store" } },
-      { resource: Product, options: { navigation: "Store" } },
-      { resource: Order, options: { navigation: "Store" } },
-      { resource: Cart, options: { navigation: "Store" } },
-      { resource: Wishlist, options: { navigation: "Store" } },
+      categoryResource,
+      productResource,
+      orderResource,
+      userResource,
+      cartResource,
+      wishlistResource,
     ],
     rootPath: "/admin",
     branding: {
       companyName: "DevCart Admin",
       softwareBrothers: false,
+      withMadeWithLove: false,
+    },
+    locale: {
+      language: "en",
+      translations: {
+        en: {
+          labels: {
+            Category: "Categories",
+            Product: "Products",
+            Order: "Orders",
+            User: "Users",
+            Cart: "Carts",
+            Wishlist: "Wishlists",
+          },
+        },
+      },
     },
   });
 
@@ -49,20 +66,23 @@ const setupAdmin = async (app) => {
         return false;
       },
       cookieName: "adminjs",
-      cookiePassword: process.env.SESSION_SECRET || "fallback_secret_must_be_changed",
+      cookiePassword:
+        process.env.SESSION_SECRET || "fallback_secret_must_be_changed",
     },
     null,
     {
       store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
       secret: process.env.SESSION_SECRET || "fallback_secret_must_be_changed",
     }
   );
 
   app.use(admin.options.rootPath, adminRouter);
-  
-  console.log(`AdminJS started on http://localhost:${process.env.PORT || 5000}${admin.options.rootPath}`);
+
+  console.log(
+    `AdminJS started on http://localhost:${process.env.PORT || 5000}${admin.options.rootPath}`
+  );
 };
 
 module.exports = setupAdmin;
