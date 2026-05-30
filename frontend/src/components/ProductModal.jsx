@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { useLockBodyScroll } from '../hooks/useLockBodyScroll'
 import ProductImage from './ProductImage'
+import { formatProductRating, formatReviewsCount } from '../utils/productRating'
 
 function getDescription(product) {
   const text = product?.description?.trim()
@@ -113,9 +114,9 @@ export default function ProductModal() {
               </span>
               <span className="flex items-center gap-1 text-xs font-semibold text-stone-500">
                 <span className="text-amber-500 text-sm">★</span>
-                <span className="text-slate-800 font-bold">{activeProductDetail.rating || 4.7}</span>
+                <span className="text-slate-800 font-bold">{formatProductRating(activeProductDetail.rating)}</span>
                 <span className="text-stone-400">
-                  ({activeProductDetail.reviewsCount || 100} reviews)
+                  ({formatReviewsCount(activeProductDetail.reviewsCount).toLocaleString()} reviews)
                 </span>
               </span>
             </div>
@@ -173,9 +174,9 @@ export default function ProductModal() {
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-stone-500 pb-0.5">
                   <span className="text-amber-500 text-sm">★</span>
-                  <span className="text-slate-800 font-bold">{activeProductDetail.rating || 4.7}</span>
+                  <span className="text-slate-800 font-bold">{formatProductRating(activeProductDetail.rating)}</span>
                   <span className="text-stone-400">
-                    ({activeProductDetail.reviewsCount || 100} reviews)
+                    ({formatReviewsCount(activeProductDetail.reviewsCount).toLocaleString()} reviews)
                   </span>
                 </span>
               </div>

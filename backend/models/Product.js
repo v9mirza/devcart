@@ -28,6 +28,17 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: 0,
     },
+    rating: {
+      type: Number,
+      default: 4.5,
+      min: 0,
+      max: 5,
+    },
+    reviewsCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true }
 );

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useCart, getProductId } from '../context/CartContext'
 import ProductImage from './ProductImage'
+import { formatProductRating } from '../utils/productRating'
 
 export default function CatalogSection() {
   const [sortBy, setSortBy] = useState('featured')
@@ -195,7 +196,7 @@ export default function CatalogSection() {
 
                 <div className="flex items-center justify-between border-t border-stone-100 pt-3">
                   <span className="text-[11px] font-bold text-stone-500 flex items-center gap-0.5">
-                    ★ {prod.rating || 4.7}
+                    ★ {formatProductRating(prod.rating)}
                   </span>
                   <button
                     onClick={() => setActiveProductDetail(prod)}

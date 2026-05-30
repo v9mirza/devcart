@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useCart, getProductId } from '../context/CartContext'
 import ProductImage from './ProductImage'
+import { formatProductRating } from '../utils/productRating'
 
 function pickDistinctPreviewProducts(productList, getProductImage, limit = 3) {
   const picked = []
@@ -36,7 +37,7 @@ export default function BentoGrid() {
   } = useCart()
 
   const spotlightSoundName = spotlightProduct?.name?.split(' ')[0] || 'Sequoia'
-  const spotlightRating = Number(spotlightProduct?.rating || 4.8).toFixed(1)
+  const spotlightRating = formatProductRating(spotlightProduct?.rating)
   // Pick specific DB products so the UI matches the reference screenshot.
   const earbudCardProduct =
     products.find((p) => (p.name || '').toLowerCase().includes('x-bud')) ||
