@@ -61,7 +61,9 @@ const setupAdmin = async (app) => {
     },
   });
 
-  admin.watch();
+  if (process.env.NODE_ENV !== "production") {
+    admin.watch();
+  }
 
   const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
     admin,
@@ -85,6 +87,11 @@ const setupAdmin = async (app) => {
       resave: false,
       saveUninitialized: false,
       secret: process.env.SESSION_SECRET || "fallback_secret_must_be_changed",
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        sameSite: "lax",
+      },
     }
   );
 
