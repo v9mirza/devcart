@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import UserAvatar from '../components/UserAvatar'
 
+import { apiUrl } from '../utils/api'
+
 const TABS = [
   { id: 'orders', label: 'Orders' },
   { id: 'account', label: 'Account' },
@@ -142,7 +144,7 @@ export default function ProfilePage() {
 
     const fetchOrders = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/orders/myorders', {
+        const response = await fetch(apiUrl('/api/orders/myorders'), {
           headers: { Authorization: `Bearer ${token}` }
         })
         if (response.ok) {

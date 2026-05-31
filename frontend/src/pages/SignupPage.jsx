@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
+import { apiUrl } from '../utils/api'
+
 export default function SignupPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -17,7 +19,7 @@ export default function SignupPage() {
     setError(null)
 
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch(apiUrl('/api/users'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })

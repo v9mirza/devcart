@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useMemo, useEffect, useRef } from 'react'
 import { calculateCartPricing } from '../utils/pricing'
 import { productMatchesSearch } from '../utils/productSearch'
+import { apiUrl } from '../utils/api'
 import vrHeadset from '../assets/vr_headset.png'
 import blueHeadphones from '../assets/blue_headphones.png'
 import wirelessEarbuds from '../assets/wireless_earbuds.png'
@@ -153,8 +154,8 @@ export function CartProvider({ children }) {
       try {
         setLoading(true)
         const [prodRes, catRes] = await Promise.all([
-          fetch('http://localhost:5000/api/products?limit=100'),
-          fetch('http://localhost:5000/api/categories')
+          fetch(apiUrl('/api/products?limit=100')),
+          fetch(apiUrl('/api/categories'))
         ])
 
         if (!prodRes.ok || !catRes.ok) {
@@ -278,7 +279,7 @@ export function CartProvider({ children }) {
     const token = localStorage.getItem('devcart_token')
     if (!token) return
     try {
-      const res = await fetch('http://localhost:5000/api/users/me', {
+      const res = await fetch(apiUrl('/api/users/me'), {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (res.ok) {
@@ -321,7 +322,7 @@ export function CartProvider({ children }) {
     const token = localStorage.getItem('devcart_token')
     if (!token || !user) return
     try {
-      const res = await fetch('http://localhost:5000/api/cart', {
+      const res = await fetch(apiUrl('/api/cart'), {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -366,7 +367,7 @@ export function CartProvider({ children }) {
     const token = localStorage.getItem('devcart_token')
     if (!token || !user) return
     try {
-      const res = await fetch('http://localhost:5000/api/wishlist', {
+      const res = await fetch(apiUrl('/api/wishlist'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -399,7 +400,7 @@ export function CartProvider({ children }) {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/wishlist/toggle', {
+      const res = await fetch(apiUrl('/api/wishlist/toggle'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -487,7 +488,7 @@ export function CartProvider({ children }) {
     }
 
     try {
-        const res = await fetch('http://localhost:5000/api/cart', {
+        const res = await fetch(apiUrl('/api/cart'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -540,7 +541,7 @@ export function CartProvider({ children }) {
 
     if (isValidObjectId(String(productId))) {
       try {
-        const res = await fetch(`http://localhost:5000/api/cart/${productId}`, {
+        const res = await fetch(apiUrl(`/api/cart/${productId}`), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -586,7 +587,7 @@ export function CartProvider({ children }) {
 
     if (isValidObjectId(String(productId))) {
       try {
-        const res = await fetch(`http://localhost:5000/api/cart/${productId}`, {
+        const res = await fetch(apiUrl(`/api/cart/${productId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -628,7 +629,7 @@ export function CartProvider({ children }) {
       return
     }
     try {
-      const res = await fetch('http://localhost:5000/api/cart', {
+      const res = await fetch(apiUrl('/api/cart'), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -732,7 +733,7 @@ export function CartProvider({ children }) {
     const token = localStorage.getItem('devcart_token')
     if (!token || !user) return
     try {
-      const res = await fetch('http://localhost:5000/api/wishlist', {
+      const res = await fetch(apiUrl('/api/wishlist'), {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -747,7 +748,7 @@ export function CartProvider({ children }) {
     const token = localStorage.getItem('devcart_token')
     if (!token || !user) return false
     try {
-      const res = await fetch('http://localhost:5000/api/users/profile', {
+      const res = await fetch(apiUrl('/api/users/profile'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

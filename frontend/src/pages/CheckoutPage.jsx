@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useCart, getProductId } from '../context/CartContext'
 import ProductImage from '../components/ProductImage'
 
+import { apiUrl } from '../utils/api'
+
 export default function CheckoutPage() {
   const {
     cart,
@@ -61,7 +63,7 @@ export default function CheckoutPage() {
       // Wait, the API.md states: "POST /api/orders: Create a new order from the logged-in user's cart. Auth required. Required body: shippingAddress, paymentMethod. Clears cart after successful order creation."
       // So we need to sync cart to backend first, or just submit!
       // Wait! Let's check: to submit the order, we post the shippingAddress and paymentMethod.
-      const response = await fetch('http://localhost:5000/api/orders', {
+      const response = await fetch(apiUrl('/api/orders'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
