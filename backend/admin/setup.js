@@ -1,3 +1,4 @@
+const path = require("path");
 const { MongoStore } = require("connect-mongo");
 
 const dashboardHandler = require("./dashboard");
@@ -9,7 +10,7 @@ const cartResource = require("./resources/cart");
 const wishlistResource = require("./resources/wishlist");
 
 const setupAdmin = async (app) => {
-  const { default: AdminJS } = await import("adminjs");
+  const { default: AdminJS, ComponentLoader } = await import("adminjs");
   const AdminJSExpress = await import("@adminjs/express");
   const AdminJSMongoose = await import("@adminjs/mongoose");
 
@@ -18,8 +19,17 @@ const setupAdmin = async (app) => {
     Resource: AdminJSMongoose.Resource,
   });
 
+  const componentLoader = new ComponentLoader();
+  const Components = {
+    Dashboard: componentLoader.add("Dashboard", path.join(__dirname, "components/Dashboard")),
+  };
+
   const admin = new AdminJS({
-    dashboard: { handler: dashboardHandler },
+    componentLoader,
+    dashboard: {
+      component: Components.Dashboard,
+      handler: dashboardHandler,
+    },
     resources: [
       categoryResource,
       productResource,
