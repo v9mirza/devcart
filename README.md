@@ -1,18 +1,18 @@
 # DevCart
 
-Modern full-stack e-commerce app for a tech store — browse products, manage cart & wishlist, checkout, and run the store from an admin panel.
+Modern full-stack e-commerce app for a tech store — browse products, manage cart & wishlist, checkout, and run the store from an admin panel with sales analytics.
 
 ## What's included
 
-**Storefront** — catalog with search, filters, and ratings · product details · cart & wishlist · checkout · profile & order history
+**Storefront** — bento hero · catalog with live search & suggestions · category filters & sort · product details · cart & wishlist · checkout · profile & order history · responsive mobile layout
 
-**Backend** — REST API · JWT auth · MongoDB · role-based admin routes
+**Backend** — REST API · JWT auth · MongoDB · cart & wishlist sync · role-based admin routes · [API reference](backend/API.md)
 
-**Admin** — [AdminJS](https://adminjs.co/) dashboard for products, categories, orders, users, carts, and wishlists
+**Admin** — [AdminJS](https://adminjs.co/) panel for products, categories, orders, users, carts, and wishlists · analytics dashboard (revenue, orders, top products, fulfillment stats) · mark orders paid / delivered
 
 ## Stack
 
-React · Vite · Tailwind CSS · Node.js · Express · MongoDB · JWT · AdminJS
+React · Vite · Tailwind CSS · Node.js · Express · MongoDB · JWT · AdminJS · Recharts
 
 ## Get started
 
