@@ -8,9 +8,17 @@ dotenv.config();
 const app = express();
 const setupAdmin = require("./admin/setup");
 
-const allowedOrigins = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",").map((origin) => origin.trim())
-  : ["http://localhost:5173"];
+const allowedOrigins = (() => {
+  const origins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(",").map((o) => o.trim())
+    : ["http://localhost:5173"];
+
+  // also allow backend origin (useful when opening admin UI directly)
+  const backendOrigin = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+  if (!origins.includes(backendOrigin)) origins.push(backendOrigin);
+
+  return origins;
+})();
 
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
@@ -25,6 +33,7 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
+    credentials: true,
   })
 );
 app.use(express.json());
