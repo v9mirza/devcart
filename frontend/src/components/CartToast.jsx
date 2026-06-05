@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
 export default function CartToast() {
-  const { cartToast, setCartToast, setIsCartOpen } = useCart()
+  const { cartToast, setCartToast, setIsCartOpen, setActiveProductDetail } = useCart()
   const navigate = useNavigate()
 
   if (!cartToast) return null
@@ -11,7 +11,7 @@ export default function CartToast() {
 
   return (
     <div
-      className="fixed bottom-6 left-1/2 z-[70] w-[min(100%-2rem,22rem)] animate-toast-in"
+      className="fixed top-6 left-1/2 z-[70] w-[min(100%-2rem,22rem)] animate-toast-in"
       role="status"
       aria-live="polite"
     >
@@ -53,6 +53,7 @@ export default function CartToast() {
             type="button"
             onClick={() => {
               setCartToast(null)
+              setActiveProductDetail(null)
               navigate('/login')
             }}
             className="text-[11px] font-bold text-amber-300 hover:text-amber-200 shrink-0 cursor-pointer"
