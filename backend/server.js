@@ -7,18 +7,14 @@ dotenv.config();
 
 const app = express();
 const setupAdmin = require("./admin/setup");
+const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = (() => {
-  const origins = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.split(",").map((o) => o.trim())
-    : ["http://localhost:5173"];
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",").map((o) => o.trim())
+  : ["http://localhost:5173"];
 
-  // also allow backend origin (useful when opening admin UI directly)
-  const backendOrigin = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
-  if (!origins.includes(backendOrigin)) origins.push(backendOrigin);
-
-  return origins;
-})();
+const backendOrigin = process.env.BACKEND_URL || `http://localhost:${PORT}`;
+if (!allowedOrigins.includes(backendOrigin)) allowedOrigins.push(backendOrigin);
 
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
@@ -41,7 +37,7 @@ app.use(express.json());
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
-  .catch(console.error);
+  .catch((err) => console.error("MongoDB connection failed:", err.message));
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
@@ -55,13 +51,11 @@ app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 
-// Start listening immediately so Render health checks pass during AdminJS startup.
-const PORT = process.env.PORT || 5000;
+// Listen first so deploy health checks pass while AdminJS bundles.
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// AdminJS bundles many files on first boot; load it after the server is up.
 (async () => {
   if (process.env.DISABLE_ADMIN === "true") {
     console.log("AdminJS disabled (DISABLE_ADMIN=true)");
