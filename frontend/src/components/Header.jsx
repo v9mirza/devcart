@@ -6,6 +6,7 @@ import ProductImage from './ProductImage'
 import UserAvatar from './UserAvatar'
 
 const SUGGESTION_LIMIT = 5
+const SIZE_TRANSITION = 'transition-[width,height,padding,gap,font-size] duration-200 ease-out motion-reduce:transition-none'
 
 function SearchField({
   variant = 'default',
@@ -96,12 +97,12 @@ function SearchField({
         aria-autocomplete="list"
         className={
           isMobile
-            ? `w-full rounded-full border bg-white font-medium text-slate-800 shadow-[0_2px_14px_-6px_rgba(13,148,136,0.14)] transition-all placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-accent ${
+            ? `w-full rounded-full border bg-white font-medium text-slate-800 shadow-[0_2px_14px_-6px_rgba(13,148,136,0.14)] ${SIZE_TRANSITION} placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-teal-100 focus:border-accent ${
                 compact
                   ? 'py-2.5 pl-4 pr-12 text-sm border-teal-200/70'
                   : 'py-3 pl-4 pr-12 text-[15px] border-teal-200/90'
               }`
-            : `form-input rounded-full w-full shadow-sm ${
+            : `form-input rounded-full w-full shadow-sm ${SIZE_TRANSITION} ${
                 compact
                   ? 'py-2 pl-4 pr-11 text-sm'
                   : 'py-2.5 pl-5 pr-24 text-base md:text-sm'
@@ -135,7 +136,7 @@ function SearchField({
         onClick={() => {
           if (searchQuery.trim()) handleViewAll()
         }}
-        className={`absolute right-1 top-1/2 -translate-y-1/2 bg-accent text-accent-foreground rounded-full flex items-center justify-center cursor-pointer hover:bg-accent-hover transition-all active:scale-95 ${
+        className={`absolute right-1 top-1/2 -translate-y-1/2 bg-accent text-accent-foreground rounded-full flex items-center justify-center cursor-pointer hover:bg-accent-hover ${SIZE_TRANSITION} active:scale-95 ${
           isMobile
             ? 'w-9 h-9 shadow-sm shadow-teal-900/15'
             : compact
@@ -244,10 +245,10 @@ export default function Header({ compact = false }) {
   const iconSize = compact ? 'w-9 h-9' : 'w-10 h-10'
   const badgeRing = compact ? 'ring-1 ring-white' : 'ring-2 ring-white'
   const iconBtnClass =
-    'rounded-full flex items-center justify-center text-slate-700 border border-zinc-200/90 bg-white hover:bg-surface-hover hover:border-teal-200/60 active:scale-95 transition-all shadow-[0_1px_4px_rgba(15,23,42,0.06)] relative cursor-pointer'
+    `rounded-full flex items-center justify-center text-slate-700 border border-zinc-200/90 bg-white hover:bg-surface-hover hover:border-teal-200/60 active:scale-95 ${SIZE_TRANSITION} shadow-[0_1px_4px_rgba(15,23,42,0.06)] relative cursor-pointer`
 
   const iconButtons = (mobile = false) => (
-    <div className={`flex items-center shrink-0 ${mobile ? 'gap-1.5' : compact ? 'gap-1' : 'gap-2'}`}>
+    <div className={`flex items-center shrink-0 ${SIZE_TRANSITION} ${mobile ? 'gap-1.5' : compact ? 'gap-1' : 'gap-2'}`}>
       <button
         type="button"
         data-cart-target
@@ -273,7 +274,7 @@ export default function Header({ compact = false }) {
 
       <button
         onClick={() => setIsWishlistOpen(true)}
-        className={`${iconSize} rounded-full flex items-center justify-center border transition-all active:scale-95 cursor-pointer relative shadow-[0_1px_4px_rgba(15,23,42,0.06)] ${
+        className={`${iconSize} rounded-full flex items-center justify-center border ${SIZE_TRANSITION} active:scale-95 cursor-pointer relative shadow-[0_1px_4px_rgba(15,23,42,0.06)] ${
           wishlist.length > 0
             ? 'bg-rose-50 border-rose-200 text-rose-500 hover:bg-rose-100/80'
             : iconBtnClass
@@ -295,7 +296,7 @@ export default function Header({ compact = false }) {
       {user ? (
         <Link
           to="/profile"
-          className={`${iconSize} flex items-center justify-center rounded-full shadow-sm hover:opacity-90 transition-all shrink-0 ring-2 ring-white`}
+          className={`${iconSize} flex items-center justify-center rounded-full shadow-sm hover:opacity-90 ${SIZE_TRANSITION} shrink-0 ring-2 ring-white`}
           aria-label={`Profile (${user.name || user.email})`}
         >
           <UserAvatar
@@ -307,7 +308,7 @@ export default function Header({ compact = false }) {
       ) : (
         <Link
           to="/login"
-          className={`shrink-0 inline-flex items-center justify-center font-bold text-accent-foreground bg-accent hover:bg-accent-hover rounded-full shadow-[0_2px_10px_-4px_rgba(13,148,136,0.45)] transition-all active:scale-[0.98] ${
+          className={`shrink-0 inline-flex items-center justify-center font-bold text-accent-foreground bg-accent hover:bg-accent-hover rounded-full shadow-[0_2px_10px_-4px_rgba(13,148,136,0.45)] ${SIZE_TRANSITION} active:scale-[0.98] ${
             compact ? 'h-9 px-3.5 text-xs' : 'h-10 px-4 text-sm'
           }`}
         >
@@ -320,7 +321,7 @@ export default function Header({ compact = false }) {
   const logoMark = (showWordmark = true, mobile = false) => (
     <Link to="/" className="flex items-center gap-2 text-slate-900 hover:opacity-90 shrink-0 min-w-0 group">
       <span
-        className={`bg-accent text-accent-foreground rounded-[10px] flex items-center justify-center font-serif font-black shrink-0 shadow-[0_2px_8px_-2px_rgba(13,148,136,0.35)] transition-transform group-active:scale-95 ${
+        className={`bg-accent text-accent-foreground rounded-[10px] flex items-center justify-center font-serif font-black shrink-0 shadow-[0_2px_8px_-2px_rgba(13,148,136,0.35)] ${SIZE_TRANSITION} group-active:scale-95 ${
           mobile
             ? compact
               ? 'w-8 h-8 text-base'
@@ -334,7 +335,7 @@ export default function Header({ compact = false }) {
       </span>
       {showWordmark && (
         <span
-          className={`font-extrabold tracking-tighter truncate ${
+          className={`font-extrabold tracking-tighter truncate ${SIZE_TRANSITION} ${
             mobile
               ? compact
                 ? 'text-base'
@@ -353,7 +354,7 @@ export default function Header({ compact = false }) {
   return (
     <header className="w-full">
       {/* Mobile: logo + actions on top, full-width search below */}
-      <div className={`md:hidden flex flex-col ${compact ? 'gap-2.5' : 'gap-3'}`}>
+      <div className={`md:hidden flex flex-col ${SIZE_TRANSITION} ${compact ? 'gap-2.5' : 'gap-3'}`}>
         <div className="flex items-center justify-between gap-3 min-w-0">
           {logoMark(true, true)}
           {iconButtons(true)}
