@@ -55,17 +55,25 @@ app.use("/api/orders", require("./routes/orderRoutes"));
 app.use("/api/cart", require("./routes/cartRoutes"));
 app.use("/api/wishlist", require("./routes/wishlistRoutes"));
 
-// Set up AdminJS and start server (must be async)
-(async () => {
-  await setupAdmin(app);
+// Start listening immediately so Render health checks pass during AdminJS startup.
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
-  // 404 Not Found handler (must be last)
+// AdminJS bundles many files on first boot; load it after the server is up.
+(async () => {
+  if (process.env.DISABLE_ADMIN === "true") {
+    console.log("AdminJS disabled (DISABLE_ADMIN=true)");
+  } else {
+    try {
+      await setupAdmin(app);
+    } catch (err) {
+      console.error("AdminJS failed to start:", err);
+    }
+  }
+
   app.use((req, res) => {
     res.status(404).json({ message: "Route not found" });
-  });
-
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
   });
 })();
