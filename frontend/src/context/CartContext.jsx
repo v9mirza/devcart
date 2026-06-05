@@ -129,14 +129,26 @@ export function CartProvider({ children }) {
   const catalogRef = useRef(null)
   const authSyncRef = useRef(false)
 
+  const showToast = (toast, duration = 3200) => {
+    setCartToast(toast)
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = setTimeout(() => setCartToast(null), duration)
+  }
+
   const notifyAddedToCart = (product) => {
-    setCartToast({ message: 'Added to cart', name: product?.name })
+    showToast({ type: 'success', message: 'Added to cart', name: product?.name })
     setCartBadgePulse(true)
     setFlyToCartSignal((n) => n + 1)
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current)
-    toastTimerRef.current = setTimeout(() => setCartToast(null), 3200)
     pulseTimerRef.current = setTimeout(() => setCartBadgePulse(false), 650)
+  }
+
+  const notifyAuthRequired = (action) => {
+    const copy =
+      action === 'wishlist'
+        ? { message: 'Sign in to save items', name: 'Add favourites to your wishlist' }
+        : { message: 'Sign in to add to cart', name: 'Your cart is saved to your account' }
+    showToast({ type: 'auth', ...copy }, 4000)
   }
 
   const scrollToCatalog = () => {
@@ -386,7 +398,7 @@ export function CartProvider({ children }) {
   const toggleWishlist = async (product) => {
     const token = localStorage.getItem('devcart_token')
     if (!token || !user) {
-      alert('Please sign in to add items to your wishlist.')
+      notifyAuthRequired('wishlist')
       return
     }
     
@@ -457,7 +469,7 @@ export function CartProvider({ children }) {
   const addToCart = async (product, quantity = 1) => {
     const token = localStorage.getItem('devcart_token')
     if (!token || !user) {
-      alert('Please sign in to add items to your cart.')
+      notifyAuthRequired('cart')
       return
     }
 
